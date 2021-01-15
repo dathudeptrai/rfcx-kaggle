@@ -579,6 +579,10 @@ class MelSampler(tf.keras.utils.Sequence):
                 )
                 x_aug.append(cutmix_sample)
                 y_aug.append(cutmix_label)
+            else:
+                # no apply cutmix in this case
+                x_aug.append(original_sample)
+                y_aug.append(original_label)
 
         return x_aug, y_aug
 
