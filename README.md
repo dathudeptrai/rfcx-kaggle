@@ -20,7 +20,7 @@ for ((fold=0; fold<=4; fold++))
 do
     echo "Start training fold ${fold}"
     python train.py train-model \
-        --backbone_name --fold_idx ${fold} \
+        --fold_idx ${fold} \
         --saved_path "./checkpoints/${model_name}_${version}" \
         --pretrained_with_contrastive 1 \
 
