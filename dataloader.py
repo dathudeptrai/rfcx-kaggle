@@ -57,7 +57,7 @@ def convert_csv_to_dict_for_dataloader(csv_data):
     return dict_data
 
 
-class BalancedMelSamplerV2(tf.keras.utils.Sequence):
+class BalancedMelSampler(tf.keras.utils.Sequence):
     def __init__(
         self,
         dict_data,
@@ -434,7 +434,6 @@ class MelSampler(tf.keras.utils.Sequence):
         max_length=384,
         is_train=False,
         use_cutmix=False,
-        use_mixup=False,
         shuffle_aug=False,
     ):
         self.dict_data = dict_data
@@ -444,7 +443,6 @@ class MelSampler(tf.keras.utils.Sequence):
         self.max_length = max_length
         self.is_train = is_train
         self.use_cutmix = use_cutmix
-        self.use_mixup = use_mixup
         self.shuffle_aug = shuffle_aug
 
         self.augment = naf.Sequential(
@@ -736,7 +734,7 @@ if __name__ == "__main__":
                 train_data.iloc[val_index]
             )
 
-            balanced_train_data_loader = BalancedMelSamplerV2(
+            balanced_train_data_loader = BalancedMelSampler(
                 fold_train_dict,
                 cache=True,
                 batch_size=64,
@@ -756,6 +754,5 @@ if __name__ == "__main__":
                 n_classes=24,
                 is_train=False,
                 use_cutmix=False,
-                use_mixup=False,
                 shuffle_aug=False,
             )
