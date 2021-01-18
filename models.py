@@ -76,7 +76,7 @@ class DeepMetricLearning(tf.keras.Model):
         x, y = data
 
         # forward pass
-        features = self(x, training=True)
+        features = self(x, training=False)
 
         # calculate metric learning loss
         metric_loss = tf.reduce_mean(self.metric_loss_fn(y, features))
