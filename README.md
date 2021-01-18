@@ -24,7 +24,7 @@ do
         --saved_path "./checkpoints/${model_name}_${version}" \
         --pretrained_with_contrastive 1 \
 
-    python train_cls.py train-model \
+    python train.py train-model \
         --fold_idx ${fold} \
         --saved_path "./checkpoints/${model_name}_${version}" \
         --pretrained_with_contrastive 0 \
