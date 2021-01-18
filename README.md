@@ -6,7 +6,7 @@ Kaggle Rainforest Connection Species Audio Detection
 ### Step 1: Preprocessing
 
 ```bash
-python preprocess
+python preprocess.py
 ```
 
 ### Step 2: Training Supervise Contrastive Learning and Fine-tune Classification 
