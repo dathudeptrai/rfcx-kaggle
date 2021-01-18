@@ -392,9 +392,34 @@ class BalancedMelSamplerV2(tf.keras.utils.Sequence):
                 x_aug.append(cutmix_sample)
                 y_aug.append(cutmix_label)
             else:
-                # no cutmix in this case
-                x_aug.append(original_sample)
-                y_aug.append(original_label)
+                # class 23
+                if original_s == 0 and (random_chunk_len - original_e) == 0:
+                    cutmix_sample = np.copy(original_sample)
+                    cutmix_length = np.random.randint(32, random_chunk_len // 2)
+                    cutmix_start = np.random.randint(
+                        0, random_chunk_len - cutmix_length
+                    )
+                    (
+                        cutmix_sample[cutmix_start : cutmix_start + cutmix_length],
+                        _s,
+                        _e,
+                        _labels,
+                    ) = self.random_sample(
+                        r_mixed_sample,
+                        self.dict_data[r_mixed_sample][-1],
+                        int(self.dict_data[r_mixed_sample][0][2] * 50),
+                        int(self.dict_data[r_mixed_sample][0][4] * 50),
+                        cutmix_length,
+                        augment=False,
+                    )
+                    mixed_label = np.zeros_like(original_label)
+                    for l in _labels:
+                        mixed_label[l] = 1.0
+                    cutmix_label = np.clip(
+                        np.array(original_label) + np.array(mixed_label), 0, 1
+                    )
+                    x_aug.append(cutmix_sample)
+                    y_aug.append(cutmix_label)
 
         return x_aug, y_aug
 
@@ -580,9 +605,34 @@ class MelSampler(tf.keras.utils.Sequence):
                 x_aug.append(cutmix_sample)
                 y_aug.append(cutmix_label)
             else:
-                # no apply cutmix in this case
-                x_aug.append(original_sample)
-                y_aug.append(original_label)
+                # Class 23
+                if original_s == 0 and (random_chunk_len - original_e) == 0:
+                    cutmix_sample = np.copy(original_sample)
+                    cutmix_length = np.random.randint(32, random_chunk_len // 2)
+                    cutmix_start = np.random.randint(
+                        0, random_chunk_len - cutmix_length
+                    )
+                    (
+                        cutmix_sample[cutmix_start : cutmix_start + cutmix_length],
+                        _s,
+                        _e,
+                        _labels,
+                    ) = self.random_sample(
+                        r_mixed_sample,
+                        self.dict_data[r_mixed_sample][-1],
+                        int(self.dict_data[r_mixed_sample][0][2] * 50),
+                        int(self.dict_data[r_mixed_sample][0][4] * 50),
+                        cutmix_length,
+                        augment=False,
+                    )
+                    mixed_label = np.zeros_like(original_label)
+                    for l in _labels:
+                        mixed_label[l] = 1.0
+                    cutmix_label = np.clip(
+                        np.array(original_label) + np.array(mixed_label), 0, 1
+                    )
+                    x_aug.append(cutmix_sample)
+                    y_aug.append(cutmix_label)
 
         return x_aug, y_aug
 
