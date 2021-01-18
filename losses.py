@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy
 from scipy.sparse import csr_matrix
 import numpy as np
+import tensorflow_addons as tfa
 
 
 def compute_indptr(y_true):
@@ -48,3 +49,22 @@ def label_ranking_loss_tf(y_true, y_pred, is_fp=False):
         return loss
     else:
         return -1.0 * loss
+
+
+class NpairsLoss(tf.keras.losses.Loss):
+    def __init__(self, temperature=0.05, name=None):
+        super(NpairsLoss, self).__init__(name=name)
+        self.temperature = temperature
+
+    def __call__(self, labels, feature_vectors, sample_weight=None):
+        # Normalize feature vectors
+        feature_vectors_normalized = tf.math.l2_normalize(feature_vectors, axis=1)
+        # Compute logits
+        logits = tf.divide(
+            tf.matmul(
+                feature_vectors_normalized, tf.transpose(feature_vectors_normalized)
+            ),
+            self.temperature,
+        )
+
+        return tfa.losses.npairs_multilabel_loss(labels, logits)
