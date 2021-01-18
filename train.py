@@ -183,3 +183,7 @@ def main(fold_idx, saved_path, pretrained_path, pretrained_with_contrastive):
             tf.keras.backend.clear_session()
             del model
             model = None
+
+
+if __name__ == "__main__":
+    cli()
