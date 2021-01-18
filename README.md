@@ -26,8 +26,8 @@ do
 
     python train_cls.py train-model \
         --fold_idx ${fold} \
-        --saved_path "./checkpoints/${sub_folder}/${model_name}_${version}" \
+        --saved_path "./checkpoints/${model_name}_${version}" \
         --pretrained_with_contrastive 0 \
-        --pretrained_path "./checkpoints/${sub_folder}/${model_name}_${version}/pretrained_best_fold${fold}.h5" \
+        --pretrained_path "./checkpoints/${model_name}_${version}/pretrained_best_fold${fold}.h5" \
 done
 ```
