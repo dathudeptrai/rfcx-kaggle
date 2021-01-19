@@ -1,10 +1,12 @@
-import pandas as pd
 import os
+
+import pandas as pd
+
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
-from iterstrat.ml_stratifiers import MultilabelStratifiedKFold
 import numpy as np
 import tensorflow as tf
+from iterstrat.ml_stratifiers import MultilabelStratifiedKFold
 
 
 def get_split(fold=0):

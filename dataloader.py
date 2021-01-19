@@ -4,24 +4,24 @@ os.environ["TF_DETERMINISTIC_OPS"] = "1"
 import tensorflow as tf
 
 tf.random.set_seed(42)
+from collections import defaultdict
+
 import nlpaug.augmenter.spectrogram as nas
 import nlpaug.flow as naf
-from collections import defaultdict
-from tqdm import tqdm
 import numpy as np
+from tqdm import tqdm
 
 np.random.seed(42)
 import os
 import random
 
 random.seed(42)
-from sklearn.utils import shuffle
-from sklearn.model_selection import StratifiedKFold
-import pandas as pd
-import soundfile as sf
-import pandas as pd
 import math
 
+import pandas as pd
+import soundfile as sf
+from sklearn.model_selection import StratifiedKFold
+from sklearn.utils import shuffle
 
 HOP_SIZE_RATIO = 50
 NUM_FEATURES = 128
@@ -717,42 +717,3 @@ class MelSampler(tf.keras.utils.Sequence):
         x_aug = np.reshape(x_aug_flatten_shuffle, x_aug_shape)
         x_aug[s_aug:e_aug] = x_aug_original[s_aug:e_aug]
         return x_aug
-
-
-if __name__ == "__main__":
-    train_data = pd.read_csv("./data/new_train_tp.csv")
-    FOLD = 0
-    skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=100)
-    for fold_id, (train_index, val_index) in enumerate(
-        skf.split(train_data["raw_recording_id"], train_data["species_id"])
-    ):
-        if fold_id == FOLD:
-            fold_train_dict = convert_csv_to_dict_for_dataloader(
-                train_data.iloc[train_index]
-            )
-            fold_valid_dict = convert_csv_to_dict_for_dataloader(
-                train_data.iloc[val_index]
-            )
-
-            balanced_train_data_loader = BalancedMelSampler(
-                fold_train_dict,
-                cache=True,
-                batch_size=64,
-                max_length=384,
-                n_classes_in_batch=8,
-                is_train=True,
-                n_classes=24,
-                use_cutmix=True,
-                shuffle_aug=False,
-            )
-
-            valid_data_loader = MelSampler(
-                fold_valid_dict,
-                cache=True,
-                max_length=384,
-                batch_size=64,
-                n_classes=24,
-                is_train=False,
-                use_cutmix=False,
-                shuffle_aug=False,
-            )
