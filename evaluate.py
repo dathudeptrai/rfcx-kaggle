@@ -7,9 +7,7 @@ for i in range(len(physical_devices)):
 tf.config.optimizer.set_experimental_options({"auto_mixed_precision": True})
 
 import glob
-import json
 import logging
-import random
 import os
 
 import click
@@ -21,7 +19,6 @@ from dataloader import MelSampler, convert_csv_to_dict_for_dataloader
 from metrics import LwlrapAccumulator
 from split_data import get_split
 from train import get_model
-
 
 SCALES = [32, 64, 128, 192, 256, 320, 384, 448, 512]
 
