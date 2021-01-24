@@ -41,6 +41,10 @@ def cli():
 def run_multi_scale_eval(checkpoints_path, fold):
     """
     This function will compute each species's lrap at different scale.
+    The idea is, for each species in test-set, we will use its predicted 
+    value at the scale that maximize its lrap in eval set. in the case 
+    that the maximum lrap value is achieved at many different scales, let take a
+    maximum scale because the smaller scale, the more false positive samples.
     """
     train_data = pd.read_csv("./data/new_train_tp.csv")
     _, val_index = get_split(fold=fold)
@@ -100,3 +104,7 @@ def run_multi_scale_eval(checkpoints_path, fold):
         os.path.join(checkpoints_path, f"fold{fold}", "lwlrap_at_scale.npy"),
         lwlrap_at_scale,
     )
+
+
+if __name__ == "__main__":
+    cli()
