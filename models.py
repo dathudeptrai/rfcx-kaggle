@@ -7,7 +7,7 @@ import tensorflow as tf
 tf.random.set_seed(42)
 
 
-NUM_FRAMES = 384
+NUM_FRAMES = 512
 NUM_FEATURES = 128
 
 
