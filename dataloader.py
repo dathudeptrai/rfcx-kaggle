@@ -145,7 +145,9 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
         if self.is_train:
             all_keys = list(self.tp_samples.keys())
             random.shuffle(all_keys)
-            shuffle_tp_samples = [(key, shuffle(self.tp_samples[key])) for key in all_keys]
+            shuffle_tp_samples = [
+                (key, shuffle(self.tp_samples[key])) for key in all_keys
+            ]
             self.tp_samples = dict(shuffle_tp_samples)
 
     def __len__(self):
