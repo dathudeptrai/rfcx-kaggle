@@ -92,3 +92,7 @@ def run_prediction(checkpoints_path, fold):
         test_csv.to_csv(
             os.path.join(checkpoints_path, f"fold{fold}", f"{scale}.csv"), index=False,
         )
+
+
+if __name__ == "__main__":
+    cli()
