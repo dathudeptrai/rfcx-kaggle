@@ -90,7 +90,7 @@ def run_prediction(checkpoints_path, fold):
             test_csv["s" + str(i)] = preds[:, i]
 
         test_csv.to_csv(
-            os.path.join(checkpoints_path, f"fold{fold}", f"{scale}.csv"), index=False,
+            os.path.join(checkpoints_path, f"fold{fold}", f"{s}.csv"), index=False,
         )
 
 
