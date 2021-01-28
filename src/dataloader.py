@@ -6,8 +6,6 @@ import tensorflow as tf
 import nlpaug.flow as naf
 import nlpaug.augmenter.spectrogram as nas
 
-
-from tqdm import tqdm
 from sklearn.utils import shuffle
 from collections import defaultdict
 
@@ -26,7 +24,7 @@ NUM_FEATURES = 128
 def convert_csv_to_dict_for_dataloader(csv_data):
     dict_data = {}
 
-    for i in tqdm(range(len(csv_data))):
+    for i in range(len(csv_data)):
         d = csv_data.iloc[i].tolist()
         if d[0] not in dict_data:
             dict_data[str(csv_data.iloc[i]["recording_id"])] = []
@@ -94,7 +92,7 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
             self.on_epoch_end()
 
     def _cache_samples(self, samples, dict_data):
-        for k in tqdm(list(dict_data.keys())):
+        for k in list(dict_data.keys()):
             if len(self.find_all_same_recording_id(k)) >= 2:
                 self.non_apply_cutmix_recording_ids.append(k)
             for segment in [dict_data[k][0]]:
@@ -460,7 +458,7 @@ class MelSampler(tf.keras.utils.Sequence):
             self.on_epoch_end()
 
     def _cache_samples(self):
-        for k, v in tqdm(self.dict_data.items()):
+        for k, v in self.dict_data.items():
             for segment in [self.dict_data[k][0]]:
                 fmin = int(segment[3])
                 fmax = int(segment[5])
