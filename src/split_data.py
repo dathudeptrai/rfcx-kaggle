@@ -1,16 +1,14 @@
 import os
-
-import pandas as pd
-
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-
 import numpy as np
+import pandas as pd
 import tensorflow as tf
 from iterstrat.ml_stratifiers import MultilabelStratifiedKFold
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+
 
 def get_split(fold=0):
-    df = pd.read_csv("./data/new_train_tp.csv")
+    df = pd.read_csv("../data/new_train_tp.csv")
     table = (
         df.groupby("raw_recording_id")["species_id"]
         .apply(

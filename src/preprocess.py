@@ -1,15 +1,14 @@
+import os
 import glob
 import logging
-import os
-
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-from multiprocessing import Pool
-
 import librosa
 import numpy as np
 import soundfile as sf
-from tqdm import tqdm
 
+from tqdm import tqdm
+from multiprocessing import Pool
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 logger = logging.getLogger(__name__)
 
 SAMPLE_RATE = 48000
@@ -27,7 +26,8 @@ def fast_read_audio(path, target_sample_rate):
 
 
 def read_mfcc(
-    input_filename, sample_rate,
+    input_filename,
+    sample_rate,
 ):
     audio, sr = fast_read_audio(input_filename, sample_rate)
     mfcc = mfcc_fbank(audio, sr)
@@ -37,9 +37,14 @@ def read_mfcc(
 
 class Audio:
     def __init__(
-        self, audio_dir: str = None, sample_rate: int = SAMPLE_RATE, ext="flac",
+        self,
+        audio_dir: str = None,
+        sample_rate: int = SAMPLE_RATE,
+        ext="flac",
+        tag="train",
     ):
         self.ext = ext
+        self.tag = tag
         self.audio_dir = audio_dir
         if audio_dir is not None:
             self.build_cache(os.path.expanduser(audio_dir), sample_rate)
@@ -70,7 +75,7 @@ class Audio:
             tqdm(
                 train_iterator_data,
                 total=len(audio_files),
-                desc="[Preprocessing train]",
+                desc=f"[Preprocessing {self.tag}]",
             ),
             chunksize=10,
         )
@@ -79,14 +84,19 @@ class Audio:
             pass
 
     def cache_audio_file(self, input_filename, sample_rate):
-        mfcc = read_mfcc(input_filename, sample_rate,)
+        mfcc = read_mfcc(
+            input_filename,
+            sample_rate,
+        )
         np.save(
-            input_filename.replace(".flac", ".npy").replace(".//", "./"), mfcc,
+            input_filename.replace(".flac", ".npy").replace(".//", "./"),
+            mfcc,
         )
 
 
 def mfcc_fbank(
-    signal: np.array, sample_rate: int,
+    signal: np.array,
+    sample_rate: int,
 ):  # 1D signal array.
     fmin = 93.75
     fmax = 13687.5
@@ -104,7 +114,5 @@ def mfcc_fbank(
 
 
 if __name__ == "__main__":
-    import pandas as pd
-
-    Audio(audio_dir="./data/train", ext="flac")
-    Audio(audio_dir="./data/test", ext="flac")
+    Audio(audio_dir="../../../data/rcfx/train", tag="train", ext="flac")
+    Audio(audio_dir="../../../data/rcfx/test", tag="test", ext="flac")

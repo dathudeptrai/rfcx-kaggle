@@ -1,21 +1,22 @@
+import os
+import glob
+import click
+import logging
+import numpy as np
+import pandas as pd
 import tensorflow as tf
+
+from tqdm import tqdm
+
+from train import get_model
+from params import TEST_MELS_PATH
+
 
 physical_devices = tf.config.list_physical_devices("GPU")
 for i in range(len(physical_devices)):
     tf.config.experimental.set_memory_growth(physical_devices[i], True)
 
 tf.config.optimizer.set_experimental_options({"auto_mixed_precision": True})
-
-import glob
-import logging
-import os
-
-import click
-import numpy as np
-import pandas as pd
-from tqdm import tqdm
-
-from train import get_model
 
 SCALES = [32, 64, 128, 192, 256, 320, 384, 448, 512]
 NUM_FEATURES = 128
@@ -47,7 +48,7 @@ def generate_s_e_window_sliding(sample_len, win_size, step_size):
 @click.option("--checkpoints_path", default="", show_default=True)
 @click.option("--fold", default=0, show_default=True)
 def run_prediction(checkpoints_path, fold):
-    test_csv = pd.read_csv("./data/sample_submission.csv")
+    test_csv = pd.read_csv("../data/sample_submission.csv")
 
     all_checkpoints = sorted(
         glob.glob(os.path.join(checkpoints_path, f"fold{fold}", "model-*.h5"))
@@ -70,7 +71,7 @@ def run_prediction(checkpoints_path, fold):
         print("Start predicting for testset at scale: ", scale)
         for count, _ in enumerate(tqdm(test_csv["recording_id"].tolist())):
             k = test_csv.iloc[count]["recording_id"]
-            mel = np.load(os.path.join("./data/test", k + ".npy"))
+            mel = np.load(os.path.join(TEST_MELS_PATH, k + ".npy"))
             mel_chunks = []
             list_s_e = generate_s_e_window_sliding(
                 len(mel), win_size=scale, step_size=scale

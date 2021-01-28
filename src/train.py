@@ -1,12 +1,26 @@
 import os
+import click
+import random
+import logging
+import numpy as np
+import pandas as pd
+import tensorflow as tf
+import tensorflow_addons as tfa
+
+
+from dataloader import (
+    BalancedMelSampler,
+    MelSampler,
+    convert_csv_to_dict_for_dataloader,
+)
+from losses import NpairsLoss
+from metrics import TFLWLRAP
+from models import NUM_FRAMES, Classifier, DeepMetricLearning
+from split_data import get_split
+
 
 os.environ["TF_DETERMINISTIC_OPS"] = "1"
 os.environ["SM_FRAMEWORK"] = "tf.keras"
-
-import random
-
-import numpy as np
-import tensorflow as tf
 
 physical_devices = tf.config.list_physical_devices("GPU")
 for i in range(len(physical_devices)):
@@ -16,25 +30,6 @@ tf.config.optimizer.set_experimental_options({"auto_mixed_precision": True})
 random.seed(42)
 np.random.seed(42)
 tf.random.set_seed(42)
-
-import json
-import logging
-
-import click
-import pandas as pd
-import tensorflow_addons as tfa
-from sklearn.utils import shuffle
-from tqdm import tqdm
-
-from dataloader import (
-    BalancedMelSampler,
-    MelSampler,
-    convert_csv_to_dict_for_dataloader,
-)
-from losses import NpairsLoss, label_ranking_loss_tf
-from metrics import TFLWLRAP, LwlrapAccumulator
-from models import NUM_FRAMES, Classifier, DeepMetricLearning
-from split_data import get_split
 
 
 @click.group()
@@ -81,7 +76,7 @@ def get_callbacks(fold_id=0, saved_path=""):
 @click.option("--pretrained_path", default="", show_default=True)
 @click.option("--pretrained_with_contrastive", default=0, show_default=True)
 def main(fold_idx, saved_path, pretrained_path, pretrained_with_contrastive):
-    train_data = pd.read_csv("./data/new_train_tp.csv")
+    train_data = pd.read_csv("../data/new_train_tp.csv")
     pretrained_with_contrastive = bool(pretrained_with_contrastive)
 
     os.makedirs(os.path.join(saved_path, f"fold{fold_idx}"), exist_ok=True)

@@ -1,11 +1,8 @@
 import os
-
-os.environ["TF_DETERMINISTIC_OPS"] = "1"
-
 import tensorflow as tf
 
+os.environ["TF_DETERMINISTIC_OPS"] = "1"
 tf.random.set_seed(42)
-
 
 NUM_FRAMES = 512
 NUM_FEATURES = 128
@@ -30,10 +27,10 @@ class DeepMetricLearning(tf.keras.Model):
         features = self.fc(features)
         return features  # [B, 128]
 
-    def compile(self, optimizer, metrics, metric_loss_fn, classification_los_fn):
+    def compile(self, optimizer, metrics, metric_loss_fn, classification_loss_fn):
         super().compile(optimizer, metrics)
         self.metric_loss_fn = metric_loss_fn
-        self.classification_los_fn = classification_los_fn
+        self.classification_loss_fn = classification_loss_fn
 
     def _apply_gradients(self, total_loss):
         # compute gradient

@@ -1,27 +1,23 @@
 import os
-
-os.environ["TF_DETERMINISTIC_OPS"] = "1"
+import math
+import random
+import numpy as np
 import tensorflow as tf
+import nlpaug.flow as naf
+import nlpaug.augmenter.spectrogram as nas
 
-tf.random.set_seed(42)
+
+from tqdm import tqdm
+from sklearn.utils import shuffle
 from collections import defaultdict
 
-import nlpaug.augmenter.spectrogram as nas
-import nlpaug.flow as naf
-import numpy as np
-from tqdm import tqdm
+from params import TRAIN_MELS_PATH
 
-np.random.seed(42)
-import os
-import random
 
+os.environ["TF_DETERMINISTIC_OPS"] = "1"
 random.seed(42)
-import math
-
-import pandas as pd
-import soundfile as sf
-from sklearn.model_selection import StratifiedKFold
-from sklearn.utils import shuffle
+np.random.seed(42)
+tf.random.set_seed(42)
 
 HOP_SIZE_RATIO = 50
 NUM_FEATURES = 128
@@ -38,7 +34,7 @@ def convert_csv_to_dict_for_dataloader(csv_data):
             dict_data[str(csv_data.iloc[i]["recording_id"])].append(
                 np.load(
                     os.path.join(
-                        "./data/train",
+                        TRAIN_MELS_PATH,
                         str(csv_data.iloc[i]["raw_recording_id"]) + ".npy",
                     )
                 )
@@ -48,7 +44,7 @@ def convert_csv_to_dict_for_dataloader(csv_data):
             dict_data[str(csv_data.iloc[i]["recording_id"])].append(
                 np.load(
                     os.path.join(
-                        "./data/train",
+                        TRAIN_MELS_PATH,
                         str(csv_data.iloc[i]["raw_recording_id"]) + ".npy",
                     )
                 )
@@ -186,7 +182,7 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
                     size=n_samples_per_class,
                     replace=len(all_samples_per_class) < n_samples_per_class,
                 )
-            except Exception as e:
+            except Exception:
                 sampling_samples = [all_samples_per_class[0]]
 
             for sample in sampling_samples:
@@ -292,7 +288,7 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
 
             if start - random_shift_left + chunk_len <= len(x):
                 x_aug = x[
-                    start - random_shift_left : start - random_shift_left + chunk_len
+                    start - random_shift_left: start - random_shift_left + chunk_len
                 ]
                 s_aug = random_shift_left
                 e_aug = s_aug + (end - start)
@@ -303,7 +299,7 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
                 shift_left_more = start - random_shift_left + chunk_len - len(x)
                 random_shift_left += shift_left_more
                 x_aug = x[
-                    start - random_shift_left : start - random_shift_left + chunk_len
+                    start - random_shift_left: start - random_shift_left + chunk_len
                 ]
                 s_aug = random_shift_left
                 e_aug = s_aug + (end - start)
@@ -364,8 +360,8 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
                     augment=False,
                 )
                 mixed_label = np.zeros_like(original_label)
-                for l in _labels:
-                    mixed_label[l] = 1.0
+                for lab in _labels:
+                    mixed_label[lab] = 1.0
                 cutmix_label = np.clip(
                     np.array(original_label) + np.array(mixed_label), 0, 1
                 )
@@ -387,8 +383,8 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
                     augment=False,
                 )
                 mixed_label = np.zeros_like(original_label)
-                for l in _labels:
-                    mixed_label[l] = 1.0
+                for lab in _labels:
+                    mixed_label[lab] = 1.0
                 cutmix_label = np.clip(
                     np.array(original_label) + np.array(mixed_label), 0, 1
                 )
@@ -403,7 +399,7 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
                         0, random_chunk_len - cutmix_length
                     )
                     (
-                        cutmix_sample[cutmix_start : cutmix_start + cutmix_length],
+                        cutmix_sample[cutmix_start: cutmix_start + cutmix_length],
                         _s,
                         _e,
                         _labels,
@@ -416,8 +412,8 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
                         augment=False,
                     )
                     mixed_label = np.zeros_like(original_label)
-                    for l in _labels:
-                        mixed_label[l] = 1.0
+                    for lab in _labels:
+                        mixed_label[lab] = 1.0
                     cutmix_label = np.clip(
                         np.array(original_label) + np.array(mixed_label), 0, 1
                     )
@@ -488,8 +484,8 @@ class MelSampler(tf.keras.utils.Sequence):
         return math.ceil(len(self.x) / self.batch_size)
 
     def __getitem__(self, idx):
-        batch_x = self.x[idx * self.batch_size : (idx + 1) * self.batch_size]
-        batch_y = self.y[idx * self.batch_size : (idx + 1) * self.batch_size]
+        batch_x = self.x[idx * self.batch_size: (idx + 1) * self.batch_size]
+        # batch_y = self.y[idx * self.batch_size: (idx + 1) * self.batch_size]
         batch_r = [x["recording_id"] for x in batch_x]
 
         batch_x_aug = []
@@ -579,8 +575,8 @@ class MelSampler(tf.keras.utils.Sequence):
                     shuffle_aug=self.shuffle_aug,
                 )
                 mixed_label = np.zeros_like(original_label)
-                for l in _labels:
-                    mixed_label[l] = 1.0
+                for lab in _labels:
+                    mixed_label[lab] = 1.0
                 cutmix_label = np.clip(
                     np.array(original_label) + np.array(mixed_label), 0, 1
                 )
@@ -599,8 +595,8 @@ class MelSampler(tf.keras.utils.Sequence):
                     shuffle_aug=self.shuffle_aug,
                 )
                 mixed_label = np.zeros_like(original_label)
-                for l in _labels:
-                    mixed_label[l] = 1.0
+                for lab in _labels:
+                    mixed_label[lab] = 1.0
                 cutmix_label = np.clip(
                     np.array(original_label) + np.array(mixed_label), 0, 1
                 )
@@ -615,7 +611,7 @@ class MelSampler(tf.keras.utils.Sequence):
                         0, random_chunk_len - cutmix_length
                     )
                     (
-                        cutmix_sample[cutmix_start : cutmix_start + cutmix_length],
+                        cutmix_sample[cutmix_start: cutmix_start + cutmix_length],
                         _s,
                         _e,
                         _labels,
@@ -628,8 +624,8 @@ class MelSampler(tf.keras.utils.Sequence):
                         augment=False,
                     )
                     mixed_label = np.zeros_like(original_label)
-                    for l in _labels:
-                        mixed_label[l] = 1.0
+                    for lab in _labels:
+                        mixed_label[lab] = 1.0
                     cutmix_label = np.clip(
                         np.array(original_label) + np.array(mixed_label), 0, 1
                     )
@@ -689,7 +685,7 @@ class MelSampler(tf.keras.utils.Sequence):
 
             if start - random_shift_left + chunk_len <= len(x):
                 x_aug = x[
-                    start - random_shift_left : start - random_shift_left + chunk_len
+                    start - random_shift_left: start - random_shift_left + chunk_len
                 ]
                 s_aug = random_shift_left
                 e_aug = s_aug + (end - start)
@@ -700,7 +696,7 @@ class MelSampler(tf.keras.utils.Sequence):
                 shift_left_more = start - random_shift_left + chunk_len - len(x)
                 random_shift_left += shift_left_more
                 x_aug = x[
-                    start - random_shift_left : start - random_shift_left + chunk_len
+                    start - random_shift_left: start - random_shift_left + chunk_len
                 ]
                 s_aug = random_shift_left
                 e_aug = s_aug + (end - start)

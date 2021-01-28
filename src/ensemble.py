@@ -1,16 +1,14 @@
 import os
-
+import glob
+import click
+import logging
 import numpy as np
 import pandas as pd
+import tensorflow as tf
+
+from tqdm import tqdm
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-import glob
-import logging
-from collections import Counter
-
-import click
-import tensorflow as tf
-from tqdm import tqdm
 
 
 @click.group()
@@ -25,7 +23,7 @@ def cli():
 def run_ensemble(checkpoints_path):
     # Step 1: Run multi-scale ensemble for each fold
     for fold in range(5):
-        test_csv = pd.read_csv("./data/sample_submission.csv")
+        test_csv = pd.read_csv("../data/sample_submission.csv")
         lwlrap_at_scale = np.load(
             os.path.join(checkpoints_path, f"fold{fold}/lwlrap_at_scale.npy")
         )  # [24, n_scales]
@@ -59,7 +57,7 @@ def run_ensemble(checkpoints_path):
     # Step 2: Kfold ensemble.
     all_csv_path = glob.glob(os.path.join(checkpoints_path, "**", "submission.csv"))
     fold_predictions = [pd.read_csv(p) for p in all_csv_path]
-    test_csv = pd.read_csv("./data/sample_submission.csv")
+    test_csv = pd.read_csv("../data/sample_submission.csv")
     preds = np.zeros(shape=[len(test_csv), 24], dtype=np.float32)
 
     for i in tqdm(range(len(test_csv))):

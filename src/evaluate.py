@@ -1,24 +1,23 @@
+
+import os
+import glob
+import click
+import logging
+import numpy as np
+import pandas as pd
 import tensorflow as tf
+
+from train import get_model
+from split_data import get_split
+from metrics import LwlrapAccumulator
+from dataloader import MelSampler, convert_csv_to_dict_for_dataloader
+
 
 physical_devices = tf.config.list_physical_devices("GPU")
 for i in range(len(physical_devices)):
     tf.config.experimental.set_memory_growth(physical_devices[i], True)
 
 tf.config.optimizer.set_experimental_options({"auto_mixed_precision": True})
-
-import glob
-import logging
-import os
-
-import click
-import numpy as np
-import pandas as pd
-from tqdm import tqdm
-
-from dataloader import MelSampler, convert_csv_to_dict_for_dataloader
-from metrics import LwlrapAccumulator
-from split_data import get_split
-from train import get_model
 
 SCALES = [32, 64, 128, 192, 256, 320, 384, 448, 512]
 
@@ -38,12 +37,12 @@ def cli():
 def run_multi_scale_eval(checkpoints_path, fold):
     """
     This function will compute each species's lrap at different scale.
-    The idea is, for each species in test-set, we will use its predicted 
-    value at the scale that maximize its lrap in eval set. in the case 
+    The idea is, for each species in test-set, we will use its predicted
+    value at the scale that maximize its lrap in eval set. in the case
     that the maximum lrap value is achieved at many different scales, let take a
     maximum scale because the smaller scale, the more false positive samples.
     """
-    train_data = pd.read_csv("./data/new_train_tp.csv")
+    train_data = pd.read_csv("../data/new_train_tp.csv")
     _, val_index = get_split(fold=fold)
     valid_dataset_csv = train_data.iloc[val_index]
 
@@ -58,7 +57,7 @@ def run_multi_scale_eval(checkpoints_path, fold):
         max_length=384,
     )
     all_checkpoints = sorted(
-        glob.glob(os.path.join(checkpoints_path, f"fold{fold}", f"model-*.h5"))
+        glob.glob(os.path.join(checkpoints_path, f"fold{fold}", "model-*.h5"))
     )
 
     model = get_model(
