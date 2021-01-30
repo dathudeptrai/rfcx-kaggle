@@ -231,9 +231,12 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
         categorical_batch_y = np.zeros(
             shape=[len(batch_y_aug), self.n_classes], dtype=np.float32
         )
+        batch_r = np.array(batch_r)
         for i, extra_label in enumerate(batch_y_aug):
             for label in extra_label:
                 categorical_batch_y[i, label] = 1.0
+
+        is_cutmix = False
 
         if use_cutmix and self.is_train and np.random.random() <= 0.5:
             batch_x_aug, categorical_batch_y = self._cutmix(
@@ -249,12 +252,19 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
             categorical_batch_y = np.reshape(
                 categorical_batch_y, (len(categorical_batch_y), -1)
             )
+            is_cutmix = True
 
-        return batch_x_aug, categorical_batch_y, random_class_idxs
+        return batch_x_aug, categorical_batch_y, random_class_idxs, batch_r, is_cutmix
 
     def __getitem__(self, index):
         samples = {}
-        (batch_x_aug_tp, categorical_batch_y_tp, random_class_idxs) = self._getitem(
+        (
+            batch_x_aug_tp,
+            categorical_batch_y_tp,
+            random_class_idxs,
+            batch_r,
+            is_cutmix,
+        ) = self._getitem(
             self.tp_samples,
             self.dict_data,
             self.batch_size,
@@ -263,6 +273,8 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
         )
         samples["x_tp"] = batch_x_aug_tp
         samples["y_tp"] = categorical_batch_y_tp
+        samples["r"] = batch_r
+        samples["is_cutmix"] = np.array([is_cutmix])
         return samples
 
     def random_sample(
