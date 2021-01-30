@@ -18,6 +18,7 @@ class DeepMetricLearning(tf.keras.Model):
     def __init__(self, backbone_name="densenet121", **kwargs):
         super().__init__(**kwargs)
         self.backbone = MODEL_FACTORY.get_model_by_name(name=backbone_name)
+        self.backbone._name = "backbone_global"
         self.fc = tf.keras.layers.Dense(units=128, activation="relu", name="fc")
         self.pooling = tf.keras.layers.GlobalAveragePooling2D(name="pooling")
 
@@ -102,8 +103,10 @@ class Classifier(DeepMetricLearning):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.dropout = tf.keras.layers.Dropout(rate=0.5)
-        self.fc = tf.keras.layers.Dense(units=512, activation=tf.nn.relu)
-        self.logits = tf.keras.layers.Dense(units=24, activation=None)
+        self.fc = tf.keras.layers.Dense(
+            units=512, activation=tf.nn.relu, name="dense_global_cls"
+        )
+        self.logits = tf.keras.layers.Dense(units=24, activation=None, dtype=tf.float32)
 
     def call(self, inputs, training=False):
         features = self.backbone(inputs, training=training)
