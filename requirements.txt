@@ -1,0 +1,5 @@
+tf2_resnets
+tensorflow-gpu==2.3.1
+nlpaug==0.0.20
+tensorflow_addons==0.11.1
+tensorflow_probability==0.11.1
