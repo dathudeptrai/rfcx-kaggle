@@ -31,7 +31,7 @@ from dataloader import (
     MelSampler,
     convert_csv_to_dict_for_dataloader,
 )
-from losses import NpairsLoss, label_ranking_loss_tf
+from losses import NpairsLoss, label_ranking_loss_tf, MovingAverageBCE
 from metrics import TFLWLRAP, LwlrapAccumulator
 from models import NUM_FRAMES, Classifier, DeepMetricLearning
 from split_data import get_split
@@ -118,6 +118,9 @@ def main(
         shuffle_aug=False,
     )
 
+    # compute step per epoch
+    step_per_epoch = int((len(fold_train_dict)) / balanced_train_data_loader.batch_size)
+
     valid_data_loader = MelSampler(
         fold_valid_dict,
         batch_size=balanced_train_data_loader.batch_size,
@@ -151,6 +154,12 @@ def main(
         metrics=[TFLWLRAP(num_classes=24, name="lwlrap")],
         metric_loss_fn=NpairsLoss(temperature=0.1, name="n_pairs"),
         classification_loss_fn=tf.keras.losses.BinaryCrossentropy(from_logits=True),
+        moving_average_bce=MovingAverageBCE(
+            train_data.iloc[train_index],
+            start_apply_step=20 * step_per_epoch,
+            momentum=0.9,
+            name="moving_average_loss",
+        ),
     )
 
     # summary model

@@ -68,3 +68,60 @@ class NpairsLoss(tf.keras.losses.Loss):
         )
 
         return tfa.losses.npairs_multilabel_loss(labels, logits)
+
+
+class MovingAverageBCE(tf.keras.losses.Loss):
+    def __init__(self, data_csv, start_apply_step=400, momentum=0.9, **kwargs):
+        super().__init__(**kwargs)
+        self.data_csv = data_csv
+        r, labels = self._get_recording_id_and_label()
+        self.moving_average_labels = tf.Variable(
+            initial_value=labels,
+            trainable=False,
+            dtype=tf.float32,
+            name="moving_average_labels",
+        )
+        self.labels = tf.Variable(
+            initial_value=labels, trainable=False, dtype=tf.float32, name="labels",
+        )
+        self.bce = tf.keras.losses.BinaryCrossentropy(
+            from_logits=True, reduction=tf.keras.losses.Reduction.NONE
+        )
+        self.momentum = momentum
+        self.r_to_idx = tf.keras.layers.experimental.preprocessing.StringLookup(
+            num_oov_indices=0, vocabulary=r
+        )
+        self.start_apply_step = start_apply_step
+
+    def _get_recording_id_and_label(self):
+        r = []
+        labels = []
+        for i in range(len(self.data_csv)):
+            row = self.data_csv.iloc[i]
+            r.append(row["recording_id"])
+            labels.append(row["species_id"])
+
+        labels = tf.keras.utils.to_categorical(labels, num_classes=24)
+        return r, labels
+
+    def __call__(self, y_true, y_pred, recording_ids, iterations=0, is_cutmix=False):
+        if (
+            iterations <= tf.constant(self.start_apply_step, dtype=iterations.dtype)
+            or is_cutmix
+        ):
+            return tf.reduce_mean(self.bce(y_true, y_pred))
+        else:
+            soft_labels = tf.stop_gradient(tf.nn.sigmoid(y_pred))
+            index = self.r_to_idx(recording_ids) - 1  # 0 is oov
+            for i in tf.range(len(index)):
+                moving_average_pred = (
+                    self.momentum * self.moving_average_labels[index[i]]
+                    + (1.0 - self.momentum) * soft_labels[i]
+                )
+                moving_average_pred += self.labels[index[i]]
+                moving_average_pred = tf.clip_by_value(moving_average_pred, 0.0, 1.0)
+                self.moving_average_labels[index[i]].assign(moving_average_pred)
+
+            y_true_update = tf.gather(self.moving_average_labels, index)
+            batch_bce = self.bce(y_true_update, y_pred)
+            return tf.reduce_mean(batch_bce)

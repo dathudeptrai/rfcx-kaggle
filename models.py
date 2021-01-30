@@ -33,10 +33,18 @@ class DeepMetricLearning(tf.keras.Model):
         features = self.fc(features)
         return features  # [B, 128]
 
-    def compile(self, optimizer, metrics, metric_loss_fn, classification_los_fn):
+    def compile(
+        self,
+        optimizer,
+        metrics,
+        metric_loss_fn,
+        classification_los_fn,
+        moving_average_bce,
+    ):
         super().compile(optimizer, metrics)
         self.metric_loss_fn = metric_loss_fn
         self.classification_los_fn = classification_los_fn
+        self.moving_average_bce = moving_average_bce
 
     def _apply_gradients(self, total_loss):
         # compute gradient
@@ -115,7 +123,9 @@ class Classifier(DeepMetricLearning):
         logits = self(x_tp, training=True)
 
         # compute loss and calculate gradients
-        cls_loss = self.classification_loss_fn(y_tp, logits)
+        cls_loss = self.moving_average_bce(
+            y_tp, logits, data["r"], self.optimizer.iterations, data["is_cutmix"][0]
+        )
         self._apply_gradients(cls_loss)
 
         self.metrics[0].update_state(y_tp, logits)
