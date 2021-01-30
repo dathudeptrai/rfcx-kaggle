@@ -45,12 +45,15 @@ def cli():
 
 
 def get_model(
-    saved_path="", pretrained_with_contrastive=False, pretrained_path="",
+    backbone_name="densenet121",
+    saved_path="",
+    pretrained_with_contrastive=False,
+    pretrained_path="",
 ):
     if pretrained_with_contrastive:
-        model = DeepMetricLearning()
+        model = DeepMetricLearning(backbone_name=backbone_name)
     else:
-        model = Classifier()
+        model = Classifier(backbone_name=backbone_name)
         model._build()
         model.load_weights(pretrained_path, by_name=True)
 
@@ -76,16 +79,20 @@ def get_callbacks(fold_id=0, saved_path=""):
 
 
 @cli.command("train-model", short_help="Train a Keras model.")
+@click.option("--backbone_name", default="densenet121", show_default=True)
 @click.option("--fold_idx", default=0, show_default=True)
 @click.option("--saved_path", default="", show_default=True)
 @click.option("--pretrained_path", default="", show_default=True)
 @click.option("--pretrained_with_contrastive", default=0, show_default=True)
-def main(fold_idx, saved_path, pretrained_path, pretrained_with_contrastive):
+def main(
+    backbone_name, fold_idx, saved_path, pretrained_path, pretrained_with_contrastive
+):
     train_data = pd.read_csv("./data/new_train_tp.csv")
     pretrained_with_contrastive = bool(pretrained_with_contrastive)
 
     os.makedirs(os.path.join(saved_path, f"fold{fold_idx}"), exist_ok=True)
     model = get_model(
+        backbone_name=backbone_name,
         saved_path=saved_path,
         pretrained_with_contrastive=pretrained_with_contrastive,
         pretrained_path=pretrained_path,

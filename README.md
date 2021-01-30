@@ -20,11 +20,13 @@ for ((fold=0; fold<=4; fold++))
 do
     echo "Start training fold ${fold}"
     python train.py train-model \
+        --backbone_name ${model_name} \
         --fold_idx ${fold} \
         --saved_path "./checkpoints/${model_name}_${version}" \
         --pretrained_with_contrastive 1 \
 
     python train.py train-model \
+        --backbone_name ${model_name} \
         --fold_idx ${fold} \
         --saved_path "./checkpoints/${model_name}_${version}" \
         --pretrained_with_contrastive 0 \
@@ -42,6 +44,7 @@ version="v1"
 for ((fold=0; fold<=4; fold++))
 do
     python evaluate.py run-multi-scale-eval \
+        --backbone_name ${model_name} \
         --fold ${fold} \
         --checkpoints_path "./checkpoints/${model_name}_${version}"
 done
@@ -58,6 +61,7 @@ version="v1"
 for ((fold=0; fold<=4; fold++))
 do
     python prediction.py run-prediction \
+        --backbone_name ${model_name} \
         --fold ${fold} \
         --checkpoints_path "./checkpoints/${model_name}_${version}"
 done

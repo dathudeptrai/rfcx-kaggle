@@ -33,9 +33,10 @@ def cli():
 @cli.command(
     "run-multi-scale-eval", short_help="eval multi-scale a trained keras model."
 )
+@click.option("--backbone_name", default="densenet121", show_default=True)
 @click.option("--checkpoints_path", default="", show_default=True)
 @click.option("--fold", default=0, show_default=True)
-def run_multi_scale_eval(checkpoints_path, fold):
+def run_multi_scale_eval(backbone_name, checkpoints_path, fold):
     """
     This function will compute each species's lrap at different scale.
     The idea is, for each species in test-set, we will use its predicted 
@@ -62,6 +63,7 @@ def run_multi_scale_eval(checkpoints_path, fold):
     )
 
     model = get_model(
+        backbone_name=backbone_name,
         saved_path=checkpoints_path,
         pretrained_with_contrastive=False,
         pretrained_path=all_checkpoints[-1],

@@ -44,9 +44,10 @@ def generate_s_e_window_sliding(sample_len, win_size, step_size):
 
 
 @cli.command("run-prediction", short_help="test a trained keras model.")
+@click.option("--backbone_name", default="densenet121", show_default=True)
 @click.option("--checkpoints_path", default="", show_default=True)
 @click.option("--fold", default=0, show_default=True)
-def run_prediction(checkpoints_path, fold):
+def run_prediction(backbone_name, checkpoints_path, fold):
     test_csv = pd.read_csv("./data/sample_submission.csv")
 
     all_checkpoints = sorted(
@@ -54,6 +55,7 @@ def run_prediction(checkpoints_path, fold):
     )
 
     model = get_model(
+        backbone_name=backbone_name,
         saved_path=checkpoints_path,
         pretrained_with_contrastive=False,
         pretrained_path=all_checkpoints[-1],

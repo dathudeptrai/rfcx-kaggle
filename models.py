@@ -4,17 +4,20 @@ os.environ["TF_DETERMINISTIC_OPS"] = "1"
 
 import tensorflow as tf
 
+from backbones import ModelFactory
+
 tf.random.set_seed(42)
 
 
 NUM_FRAMES = 512
 NUM_FEATURES = 128
+MODEL_FACTORY = ModelFactory()
 
 
 class DeepMetricLearning(tf.keras.Model):
-    def __init__(self, **kwargs):
+    def __init__(self, backbone_name="densenet121", **kwargs):
         super().__init__(**kwargs)
-        self.backbone = tf.keras.applications.DenseNet121(include_top=False)
+        self.backbone = MODEL_FACTORY.get_model_by_name(name=backbone_name)
         self.fc = tf.keras.layers.Dense(units=128, activation="relu", name="fc")
         self.pooling = tf.keras.layers.GlobalAveragePooling2D(name="pooling")
 
