@@ -1,0 +1,83 @@
+
+-------------   Fold 1 / 5  -------------
+
+ -> Preparing Data 
+
+ -> Preparing Model 
+
+ -> Loading weights from ../logs/2021-01-28/1/pretrained_best_fold0.h5
+
+ -> Training Model 
+
+Epoch 1/60
+15/15 - 8s - loss: 0.1518 - lwlrap: 0.3229 - val_loss: 0.1725 - val_lwlrap: 0.4166
+Epoch 2/60
+15/15 - 6s - loss: 0.1288 - lwlrap: 0.4979 - val_loss: 0.1668 - val_lwlrap: 0.4744
+Epoch 3/60
+15/15 - 6s - loss: 0.1445 - lwlrap: 0.5981 - val_loss: 0.1578 - val_lwlrap: 0.6009
+Epoch 4/60
+15/15 - 6s - loss: 0.0808 - lwlrap: 0.7500 - val_loss: 0.1342 - val_lwlrap: 0.6969
+Epoch 5/60
+15/15 - 6s - loss: 0.1244 - lwlrap: 0.7858 - val_loss: 0.1494 - val_lwlrap: 0.6625
+Epoch 6/60
+15/15 - 6s - loss: 0.1270 - lwlrap: 0.8243 - val_loss: 0.1349 - val_lwlrap: 0.7456
+Epoch 7/60
+15/15 - 6s - loss: 0.0592 - lwlrap: 0.8741 - val_loss: 0.1261 - val_lwlrap: 0.7004
+Epoch 8/60
+15/15 - 6s - loss: 0.0745 - lwlrap: 0.8536 - val_loss: 0.1196 - val_lwlrap: 0.7475
+Epoch 9/60
+15/15 - 6s - loss: 0.0869 - lwlrap: 0.8514 - val_loss: 0.1494 - val_lwlrap: 0.6345
+Epoch 10/60
+15/15 - 6s - loss: 0.1081 - lwlrap: 0.8924 - val_loss: 0.1101 - val_lwlrap: 0.7520
+Epoch 11/60
+15/15 - 6s - loss: 0.0881 - lwlrap: 0.8304 - val_loss: 0.1478 - val_lwlrap: 0.4821
+Epoch 12/60
+15/15 - 6s - loss: 0.0470 - lwlrap: 0.8337 - val_loss: 0.1084 - val_lwlrap: 0.7404
+Epoch 13/60
+15/15 - 6s - loss: 0.0997 - lwlrap: 0.8997 - val_loss: 0.1456 - val_lwlrap: 0.5218
+Epoch 14/60
+15/15 - 6s - loss: 0.1138 - lwlrap: 0.8636 - val_loss: 0.0976 - val_lwlrap: 0.7334
+Epoch 15/60
+15/15 - 6s - loss: 0.0412 - lwlrap: 0.8596 - val_loss: 0.1134 - val_lwlrap: 0.7091
+Epoch 16/60
+15/15 - 6s - loss: 0.0410 - lwlrap: 0.8758 - val_loss: 0.1023 - val_lwlrap: 0.7395
+Epoch 17/60
+15/15 - 6s - loss: 0.1034 - lwlrap: 0.8861 - val_loss: 0.1314 - val_lwlrap: 0.6042
+Epoch 18/60
+15/15 - 6s - loss: 0.0802 - lwlrap: 0.8945 - val_loss: 0.1008 - val_lwlrap: 0.7422
+Epoch 19/60
+15/15 - 6s - loss: 0.0998 - lwlrap: 0.8808 - val_loss: 0.1767 - val_lwlrap: 0.5314
+Epoch 20/60
+15/15 - 6s - loss: 0.0361 - lwlrap: 0.8666 - val_loss: 0.0945 - val_lwlrap: 0.7398
+Epoch 21/60
+15/15 - 6s - loss: 0.1135 - lwlrap: 0.8796 - val_loss: 0.1657 - val_lwlrap: 0.4557
+Epoch 22/60
+15/15 - 6s - loss: 0.0322 - lwlrap: 0.8994 - val_loss: 0.0956 - val_lwlrap: 0.7400
+Epoch 23/60
+15/15 - 6s - loss: 0.0707 - lwlrap: 0.9028 - val_loss: 0.1300 - val_lwlrap: 0.6136
+Epoch 24/60
+15/15 - 6s - loss: 0.0653 - lwlrap: 0.9068 - val_loss: 0.0781 - val_lwlrap: 0.7961
+Epoch 25/60
+15/15 - 6s - loss: 0.0244 - lwlrap: 0.9340 - val_loss: 0.1171 - val_lwlrap: 0.7311
+Epoch 26/60
+15/15 - 6s - loss: 0.0184 - lwlrap: 0.9514 - val_loss: 0.0951 - val_lwlrap: 0.7892
+Epoch 27/60
+15/15 - 6s - loss: 0.0636 - lwlrap: 0.9407 - val_loss: 0.1137 - val_lwlrap: 0.7425
+Epoch 28/60
+15/15 - 6s - loss: 0.0408 - lwlrap: 0.9408 - val_loss: 0.1155 - val_lwlrap: 0.8039
+Epoch 29/60
+15/15 - 6s - loss: 0.0107 - lwlrap: 0.9647 - val_loss: 0.1060 - val_lwlrap: 0.7459
+Epoch 30/60
+Logging results to ../logs/2021-01-30/17/
+
+-------------   Fold 1 / 5  -------------
+
+ -> Preparing Data 
+
+ -> Preparing Model 
+
+ -> Loading weights from ../logs/2021-01-28/1/pretrained_best_fold0.h5
+
+ -> Training Model 
+
+Epoch 1/60

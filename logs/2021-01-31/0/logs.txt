@@ -1,0 +1,58 @@
+
+-------------   Fold 1 / 5  -------------
+
+ -> Preparing Data 
+
+ -> Preparing Model 
+
+ -> Loading weights from ../logs/2021-01-30/42/pretrained_best_fold0.h5
+
+ -> Training Model 
+
+Epoch 1/60
+60/60 - 12s - loss: 0.2179 - lwlrap: 0.5001 - val_loss: 0.1753 - val_lwlrap: 0.6255
+Epoch 2/60
+60/60 - 11s - loss: 0.1749 - lwlrap: 0.7621 - val_loss: 0.1322 - val_lwlrap: 0.6673
+Epoch 3/60
+60/60 - 11s - loss: 0.1319 - lwlrap: 0.7887 - val_loss: 0.2216 - val_lwlrap: 0.6590
+Epoch 4/60
+60/60 - 10s - loss: 0.1437 - lwlrap: 0.8091 - val_loss: 0.1353 - val_lwlrap: 0.4459
+Epoch 5/60
+60/60 - 11s - loss: 0.0804 - lwlrap: 0.7962 - val_loss: 0.1427 - val_lwlrap: 0.5327
+Epoch 6/60
+60/60 - 11s - loss: 0.0873 - lwlrap: 0.8300 - val_loss: 0.1077 - val_lwlrap: 0.7711
+Epoch 7/60
+60/60 - 11s - loss: 0.0792 - lwlrap: 0.8916 - val_loss: 0.2001 - val_lwlrap: 0.7722
+Epoch 8/60
+60/60 - 11s - loss: 0.0416 - lwlrap: 0.9123 - val_loss: 0.1506 - val_lwlrap: 0.7739
+Epoch 9/60
+60/60 - 11s - loss: 0.0444 - lwlrap: 0.9502 - val_loss: 0.1388 - val_lwlrap: 0.8583
+Epoch 10/60
+60/60 - 11s - loss: 0.0226 - lwlrap: 0.9635 - val_loss: 0.1790 - val_lwlrap: 0.8650
+Epoch 11/60
+60/60 - 11s - loss: 0.0462 - lwlrap: 0.9767 - val_loss: 0.2114 - val_lwlrap: 0.8439
+Epoch 12/60
+60/60 - 11s - loss: 0.0176 - lwlrap: 0.9717 - val_loss: 0.2042 - val_lwlrap: 0.8522
+Epoch 13/60
+60/60 - 11s - loss: 0.0138 - lwlrap: 0.9803 - val_loss: 0.1290 - val_lwlrap: 0.8513
+Epoch 14/60
+60/60 - 11s - loss: 0.0231 - lwlrap: 0.9677 - val_loss: 0.2383 - val_lwlrap: 0.8129
+Epoch 15/60
+60/60 - 11s - loss: 0.0321 - lwlrap: 0.9590 - val_loss: 0.2244 - val_lwlrap: 0.8352
+Epoch 16/60
+60/60 - 11s - loss: 0.0208 - lwlrap: 0.9615 - val_loss: 0.2137 - val_lwlrap: 0.7514
+Epoch 17/60
+60/60 - 11s - loss: 0.0336 - lwlrap: 0.9728 - val_loss: 0.2079 - val_lwlrap: 0.8351
+Epoch 18/60
+60/60 - 11s - loss: 0.0143 - lwlrap: 0.9788 - val_loss: 0.2306 - val_lwlrap: 0.8362
+Epoch 19/60
+60/60 - 11s - loss: 0.0210 - lwlrap: 0.9894 - val_loss: 0.2505 - val_lwlrap: 0.8415
+Epoch 20/60
+60/60 - 11s - loss: 0.0376 - lwlrap: 0.9895 - val_loss: 0.2523 - val_lwlrap: 0.8560
+Epoch 21/60
+60/60 - 11s - loss: 0.0243 - lwlrap: 0.9943 - val_loss: 0.2610 - val_lwlrap: 0.8379
+Epoch 22/60
+60/60 - 11s - loss: 0.0209 - lwlrap: 0.9916 - val_loss: 0.2686 - val_lwlrap: 0.8519
+Epoch 23/60
+60/60 - 11s - loss: 0.0076 - lwlrap: 0.9942 - val_loss: 0.2815 - val_lwlrap: 0.8518
+Epoch 24/60

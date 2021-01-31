@@ -1,0 +1,12 @@
+
+-------------   Fold 1 / 5  -------------
+
+ -> Preparing Data 
+
+ -> Preparing Model 
+
+ -> Loading weights from ../logs/2021-01-30/42/pretrained_best_fold0.h5
+
+ -> Training Model 
+
+Epoch 1/60

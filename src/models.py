@@ -1,11 +1,14 @@
 import os
 import tensorflow as tf
+from backbones import ModelFactory
+
 
 os.environ["TF_DETERMINISTIC_OPS"] = "1"
 tf.random.set_seed(42)
 
 NUM_FRAMES = 512
 NUM_FEATURES = 128
+MODEL_FACTORY = ModelFactory()
 
 
 class CBAMAttention(tf.keras.layers.Layer):
@@ -77,10 +80,16 @@ class AttBlock(tf.keras.layers.Layer):
 
 
 class DeepMetricLearning(tf.keras.Model):
-    def __init__(self, **kwargs):
+    def __init__(self, backbone_name="densenet121", **kwargs):
         super().__init__(**kwargs)
-        self.backbone = tf.keras.applications.DenseNet121(include_top=False)
-        self.fc = tf.keras.layers.Dense(units=128, activation="relu", name="fc")
+        self.backbone = MODEL_FACTORY.get_model_by_name(name=backbone_name)
+        self.backbone._name = "backbone_global"
+        # self.backbone = tf.keras.applications.DenseNet121(include_top=False)
+
+        self.interpolate = tf.keras.layers.UpSampling2D(size=(32, 1), interpolation='bilinear')
+        self.cbam = CBAMAttention(self.backbone.output.shape[-1], ratio=8)
+
+        self.fc = tf.keras.layers.Dense(units=128, name="fc")
         self.pooling = tf.keras.layers.GlobalAveragePooling2D(name="pooling")
 
     def _build(self):
@@ -90,7 +99,10 @@ class DeepMetricLearning(tf.keras.Model):
         self(inputs, training=True)
 
     def call(self, inputs, training=False):
-        features = self.backbone(inputs, training=training)
+        features = self.backbone(inputs, training=training)  # bs x t x f x ft
+        features = self.interpolate(features)  # bs x T x f x ft
+        features = self.cbam(features)  # bs x T x f x ft
+
         features = self.pooling(features)
         features = self.fc(features)
         return features  # [B, 128]
@@ -138,7 +150,7 @@ class DeepMetricLearning(tf.keras.Model):
 
     @tf.function
     def test_step(self, data):
-        x, y = data
+        x, y, _ = data
 
         # forward pass
         features = self(x, training=False)
@@ -207,40 +219,39 @@ class Classifier(DeepMetricLearning):
         super().__init__(*args, **kwargs)
         self.pooling = None
 
-        self.interpolate = tf.keras.layers.UpSampling2D(size=(32, 1), interpolation='bilinear')
-        self.cbam = CBAMAttention(self.backbone.output.shape[-1], ratio=8)
-        self.fc = tf.keras.layers.Dense(units=512, activation=tf.nn.relu)
-        self.att_block = AttBlock(filters=24, activation="softmax")
+        # self.interpolate = tf.keras.layers.UpSampling2D(size=(32, 1), interpolation='bilinear')
+        # self.cbam = CBAMAttention(self.backbone.output.shape[-1], ratio=8)
+        # self.fc = tf.keras.layers.Dense(units=24, activation=tf.nn.sigmoid)
+        self.fc = tf.keras.layers.Dense(units=25, activation=tf.nn.softmax)
 
     def call(self, inputs, training=False):
-        features = self.backbone(inputs, training=training)
+        features = self.backbone(inputs, training=training)  # bs x t x f x ft
+        features = self.interpolate(features)  # bs x T x f x ft
+        features = self.cbam(features)  # bs x T x f x ft
 
-        features = self.interpolate(features)
+        # x = self.pooling(features)
+        # clipwise_output = self.fc(x) 
+        # return clipwise_output, clipwise_output
 
-        features = self.cbam(features)  # [B, time, frequence, nb_ft]
-
-        x = tf.reduce_mean(features, axis=2)  # [B, time, nb_ft]
-
-        x = self.fc(x)  # [B, time, 512]
-
-        framewise_output = self.att_block(x)
+        x = tf.reduce_mean(features, axis=2)  # bs x T x ft
+        framewise_output = self.fc(x)[:, :, :24]  # bs x T x num_classes
         clipwise_output = tf.reduce_max(framewise_output, axis=1)
-
-        return clipwise_output  # , framewise_output
+        return clipwise_output, framewise_output
 
     @tf.function
     def train_step(self, data):
         data = data[0]
-        x_tp, y_tp = data["x_tp"], data["y_tp"]
+        x, y, y_seg = data["x_tp"], data["y_tp"], data["y_seg_tp"]
 
         # forward step
-        logits = self(x_tp, training=True)
+        logits, seg_logits = self(x, training=True)
 
         # compute loss and calculate gradients
-        cls_loss = self.classification_loss_fn(y_tp, logits)
+        cls_loss = self.classification_loss_fn(y, logits)
+        # cls_loss = self.classification_loss_fn(y_seg, seg_logits)
         self._apply_gradients(cls_loss)
 
-        self.metrics[0].update_state(y_tp, logits)
+        self.metrics[0].update_state(y, logits)
 
         # return result
         results = {}
@@ -249,10 +260,11 @@ class Classifier(DeepMetricLearning):
 
     @tf.function
     def test_step(self, data):
-        x, y = data
-        logits = self(x, training=False)
+        x, y, y_seg = data
+        logits, seg_logits = self(x, training=False)
         # compute loss and calculate gradients
         cls_loss = self.classification_loss_fn(y, logits)
+        # cls_loss = self.classification_loss_fn(y_seg, seg_logits)
 
         self.metrics[0].update_state(y, logits)
 
