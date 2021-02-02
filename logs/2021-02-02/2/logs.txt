@@ -1,0 +1,74 @@
+
+-------------   Fold 1 / 5  -------------
+
+ -> Preparing Data 
+
+ -> Preparing Model 
+
+ -> Training Model 
+
+Epoch 1/50
+30/30 - 10s - loss: 3.1524 - val_loss: 2.8889
+Epoch 2/50
+30/30 - 8s - loss: 3.1565 - val_loss: 2.8903
+Epoch 3/50
+30/30 - 8s - loss: 3.1801 - val_loss: 2.8909
+Epoch 4/50
+30/30 - 8s - loss: 3.1374 - val_loss: 2.8908
+Epoch 5/50
+30/30 - 8s - loss: 3.1743 - val_loss: 2.8908
+Epoch 6/50
+30/30 - 8s - loss: 3.0272 - val_loss: 2.8892
+Epoch 7/50
+30/30 - 8s - loss: 2.5629 - val_loss: 2.8895
+Epoch 8/50
+30/30 - 8s - loss: 2.3455 - val_loss: 2.8871
+Epoch 9/50
+30/30 - 8s - loss: 3.2284 - val_loss: 2.8807
+Epoch 10/50
+30/30 - 8s - loss: 3.1856 - val_loss: 2.8644
+Epoch 11/50
+30/30 - 8s - loss: 2.9422 - val_loss: 2.8051
+Epoch 12/50
+30/30 - 8s - loss: 3.0190 - val_loss: 2.6586
+Epoch 13/50
+30/30 - 8s - loss: 2.1792 - val_loss: 2.1697
+Epoch 14/50
+30/30 - 8s - loss: 1.8680 - val_loss: 1.8772
+Epoch 15/50
+30/30 - 8s - loss: 1.6667 - val_loss: 1.6388
+Epoch 16/50
+30/30 - 8s - loss: 2.0132 - val_loss: 1.5811
+Epoch 17/50
+30/30 - 8s - loss: 3.0270 - val_loss: 1.4316
+Epoch 18/50
+30/30 - 8s - loss: 2.8750 - val_loss: 1.4460
+Epoch 19/50
+30/30 - 8s - loss: 1.7716 - val_loss: 1.3610
+Epoch 20/50
+30/30 - 8s - loss: 2.8531 - val_loss: 1.3940
+Epoch 21/50
+30/30 - 8s - loss: 1.7806 - val_loss: 1.3917
+Epoch 22/50
+30/30 - 8s - loss: 3.0404 - val_loss: 1.3030
+Epoch 23/50
+30/30 - 8s - loss: 3.0718 - val_loss: 1.4563
+Epoch 24/50
+30/30 - 8s - loss: 1.6489 - val_loss: 1.4173
+Epoch 25/50
+30/30 - 8s - loss: 2.9165 - val_loss: 1.3815
+Epoch 26/50
+30/30 - 8s - loss: 1.9159 - val_loss: 1.4325
+Epoch 27/50
+30/30 - 8s - loss: 2.9195 - val_loss: 1.3577
+Epoch 28/50
+30/30 - 8s - loss: 1.4694 - val_loss: 1.4176
+Epoch 29/50
+30/30 - 8s - loss: 3.0532 - val_loss: 1.3475
+Epoch 30/50
+30/30 - 8s - loss: 1.8529 - val_loss: 1.3874
+Epoch 31/50
+30/30 - 8s - loss: 3.0492 - val_loss: 1.3460
+Epoch 32/50
+30/30 - 8s - loss: 1.5214 - val_loss: 1.4269
+Epoch 33/50

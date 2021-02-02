@@ -1,6 +1,8 @@
 
 -------------   Fold 1 / 5  -------------
 
+ -> Using 2727 pseudo labels 
+
  -> Preparing Data 
 
  -> Preparing Model 
@@ -9,6 +11,5 @@
 
  -> Training Model 
 
-Epoch 1/60
 Traceback (most recent call last):
 

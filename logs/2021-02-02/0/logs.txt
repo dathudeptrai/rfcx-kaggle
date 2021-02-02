@@ -1,0 +1,16 @@
+
+-------------   Fold 1 / 5  -------------
+
+ -> Preparing Data 
+
+Logging results to ../logs/2021-02-02/1/
+
+-------------   Fold 1 / 5  -------------
+
+ -> Preparing Data 
+
+ -> Preparing Model 
+
+ -> Training Model 
+
+Epoch 1/50

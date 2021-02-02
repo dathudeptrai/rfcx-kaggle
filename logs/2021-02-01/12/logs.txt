@@ -1,6 +1,8 @@
 
 -------------   Fold 1 / 5  -------------
 
+ -> Using 3918 pseudo labels 
+
  -> Preparing Data 
 
  -> Preparing Model 

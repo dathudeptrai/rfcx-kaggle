@@ -51,7 +51,8 @@ def run_ensemble(checkpoints_path):
             test_csv["s" + str(i)] = preds[:, i]
 
         test_csv.to_csv(
-            os.path.join(checkpoints_path, f"fold{fold}/submission.csv"), index=False,
+            os.path.join(checkpoints_path, f"fold{fold}/submission.csv"),
+            index=False,
         )
 
     # Step 2: Kfold ensemble.

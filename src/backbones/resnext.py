@@ -1,6 +1,6 @@
-from tf2_resnets.blocks import stack1, stack2, stack3
-from tf2_resnets.resnet import ResNet
-
+from tf2_resnets.blocks import stack1
+# from tf2_resnets.resnet import ResNet
+from backbones.resnet import ResNet
 from backbones.mixstyle import MixStyle
 
 

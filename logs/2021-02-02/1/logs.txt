@@ -1,0 +1,10 @@
+
+-------------   Fold 1 / 5  -------------
+
+ -> Preparing Data 
+
+ -> Preparing Model 
+
+ -> Training Model 
+
+Epoch 1/50

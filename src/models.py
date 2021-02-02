@@ -46,45 +46,11 @@ class CBAMAttention(tf.keras.layers.Layer):
         return cbam_out
 
 
-class AttBlock(tf.keras.layers.Layer):
-    def __init__(self, filters, activation="softmax", temperature=1.0, **kwargs):
-        super().__init__(**kwargs)
-        self.activation = activation
-        self.temperature = temperature
-        # self.att = tf.keras.layers.Conv1D(
-        #     filters=filters, kernel_size=1, strides=1, padding="same", use_bias=True
-        # )
-        self.cla = tf.keras.layers.Conv1D(
-            filters=filters + 1,  # ->>>> n_class + 1, class 25 is background
-            kernel_size=1,
-            strides=1,
-            padding="same",
-            use_bias=True,
-        )
-
-    def call(self, x, training=False):
-        # x ->> [B, T, F]
-        # norm_att = tf.nn.softmax(
-        #     tf.clip_by_value(self.att(x), -10, 10), axis=1
-        # )  # [B, T, filters]
-        cla = self.nonlinear_transform(self.cla(x))  # [B, T, filters + 1]
-        cla = cla[:, :, :24]
-        # x = tf.reduce_sum(norm_att * cla, axis=1)  # [B, filters]
-        return cla
-
-    def nonlinear_transform(self, x):
-        if self.activation == "linear":
-            return x
-        elif self.activation == "softmax":
-            return tf.nn.softmax(x, -1)
-
-
 class DeepMetricLearning(tf.keras.Model):
     def __init__(self, backbone_name="densenet121", **kwargs):
         super().__init__(**kwargs)
         self.backbone = MODEL_FACTORY.get_model_by_name(name=backbone_name)
         self.backbone._name = "backbone_global"
-        # self.backbone = tf.keras.applications.DenseNet121(include_top=False)
 
         self.interpolate = tf.keras.layers.UpSampling2D(size=(32, 1), interpolation='bilinear')
         self.cbam = CBAMAttention(self.backbone.output.shape[-1], ratio=8)
@@ -164,74 +130,17 @@ class DeepMetricLearning(tf.keras.Model):
         return results
 
 
-class ClassifierOld(DeepMetricLearning):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.dropout = tf.keras.layers.Dropout(rate=0.5)
-        self.fc = tf.keras.layers.Dense(units=512, activation=tf.nn.relu)
-        self.logits = tf.keras.layers.Dense(units=24, activation=None)
-
-    def call(self, inputs, training=False):
-        features = self.backbone(inputs, training=training)
-        x = self.pooling(features)
-        x = self.dropout(x, training=training)
-        x = self.fc(x)
-        x = self.dropout(x, training=training)
-        x = self.logits(x)
-        return x
-
-    @tf.function
-    def train_step(self, data):
-        data = data[0]
-        x_tp, y_tp = data["x_tp"], data["y_tp"]
-
-        # forward step
-        logits = self(x_tp, training=True)
-
-        # compute loss and calculate gradients
-        cls_loss = self.classification_loss_fn(y_tp, logits)
-        self._apply_gradients(cls_loss)
-
-        self.metrics[0].update_state(y_tp, logits)
-
-        # return result
-        results = {}
-        results.update({"loss": cls_loss, "lwlrap": self.metrics[0].result()})
-        return results
-
-    @tf.function
-    def test_step(self, data):
-        x, y = data
-        logits = self(x, training=False)
-        # compute loss and calculate gradients
-        cls_loss = self.classification_loss_fn(y, logits)
-
-        self.metrics[0].update_state(y, logits)
-
-        # return result
-        results = {}
-        results.update({"loss": cls_loss, "lwlrap": self.metrics[0].result()})
-        return results
-
-
 class Classifier(DeepMetricLearning):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.pooling = None
 
-        # self.interpolate = tf.keras.layers.UpSampling2D(size=(32, 1), interpolation='bilinear')
-        # self.cbam = CBAMAttention(self.backbone.output.shape[-1], ratio=8)
-        # self.fc = tf.keras.layers.Dense(units=24, activation=tf.nn.sigmoid)
         self.fc = tf.keras.layers.Dense(units=25, activation=tf.nn.softmax)
 
     def call(self, inputs, training=False):
         features = self.backbone(inputs, training=training)  # bs x t x f x ft
         features = self.interpolate(features)  # bs x T x f x ft
         features = self.cbam(features)  # bs x T x f x ft
-
-        # x = self.pooling(features)
-        # clipwise_output = self.fc(x) 
-        # return clipwise_output, clipwise_output
 
         x = tf.reduce_mean(features, axis=2)  # bs x T x ft
         framewise_output = self.fc(x)[:, :, :24]  # bs x T x num_classes
@@ -241,7 +150,7 @@ class Classifier(DeepMetricLearning):
     @tf.function
     def train_step(self, data):
         data = data[0]
-        x, y, y_seg = data["x_tp"], data["y_tp"], data["y_seg_tp"]
+        x, y, _ = data["x_tp"], data["y_tp"], data["y_seg_tp"]
 
         # forward step
         logits, seg_logits = self(x, training=True)

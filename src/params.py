@@ -7,7 +7,7 @@ warnings.simplefilter(action="ignore", category=FutureWarning)
 SEED = 2020
 
 LOG_PATH = "../logs/"
-DATA_PATH = "../input/"
+DATA_PATH = "../data/"
 OUT_DIR = "../output/"
 
 
@@ -22,3 +22,6 @@ STD = np.array([0.229, 0.224, 0.225])
 NUM_WORKERS = 4
 
 NUM_CLASSES = 24
+NUM_FEATURES = 128
+SPEC_LENGTH = 3001
+SCALES = [32, 64, 128, 192, 256, 320, 384, 448, 512]
