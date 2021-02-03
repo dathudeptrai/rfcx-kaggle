@@ -1,0 +1,99 @@
+
+-------------   Fold 1 / 5  -------------
+
+ -> Using 2727 pseudo labels 
+
+ -> Preparing Data 
+
+ -> Preparing Model 
+
+ -> Loading weights from ../logs/2021-01-31/8/pretrained_best_fold0.h5
+
+ -> Training Model 
+
+Epoch 1/85
+60/60 - 19s - loss: 0.2438 - lwlrap: 0.1663 - val_loss: 0.1563 - val_lwlrap: 0.6477
+Epoch 2/85
+60/60 - 17s - loss: 0.1272 - lwlrap: 0.1889 - val_loss: 0.1445 - val_lwlrap: 0.7105
+Epoch 3/85
+60/60 - 17s - loss: 0.1884 - lwlrap: 0.1975 - val_loss: 0.1353 - val_lwlrap: 0.7108
+Epoch 4/85
+60/60 - 16s - loss: 0.0977 - lwlrap: 0.1962 - val_loss: 0.1420 - val_lwlrap: 0.6833
+Epoch 5/85
+60/60 - 16s - loss: 0.0669 - lwlrap: 0.2079 - val_loss: 0.1153 - val_lwlrap: 0.6696
+Epoch 6/85
+60/60 - 17s - loss: 0.0896 - lwlrap: 0.2136 - val_loss: 0.1287 - val_lwlrap: 0.7354
+Epoch 7/85
+60/60 - 17s - loss: 0.0722 - lwlrap: 0.1969 - val_loss: 0.0848 - val_lwlrap: 0.8325
+Epoch 8/85
+60/60 - 17s - loss: 0.0593 - lwlrap: 0.2216 - val_loss: 0.0907 - val_lwlrap: 0.8427
+Epoch 9/85
+60/60 - 17s - loss: 0.0413 - lwlrap: 0.2123 - val_loss: 0.1009 - val_lwlrap: 0.8495
+Epoch 10/85
+60/60 - 17s - loss: 0.0446 - lwlrap: 0.2131 - val_loss: 0.0884 - val_lwlrap: 0.8669
+Epoch 11/85
+60/60 - 16s - loss: 0.0555 - lwlrap: 0.2333 - val_loss: 0.0827 - val_lwlrap: 0.8572
+Epoch 12/85
+60/60 - 17s - loss: 0.0210 - lwlrap: 0.2254 - val_loss: 0.0988 - val_lwlrap: 0.8497
+Epoch 13/85
+60/60 - 17s - loss: 0.0378 - lwlrap: 0.2186 - val_loss: 0.0740 - val_lwlrap: 0.8321
+Epoch 14/85
+60/60 - 17s - loss: 0.0836 - lwlrap: 0.2426 - val_loss: 0.1020 - val_lwlrap: 0.8469
+Epoch 15/85
+60/60 - 16s - loss: 0.1063 - lwlrap: 0.2416 - val_loss: 0.1013 - val_lwlrap: 0.8132
+Epoch 16/85
+60/60 - 16s - loss: 0.0498 - lwlrap: 0.2203 - val_loss: 0.1050 - val_lwlrap: 0.8449
+Epoch 17/85
+60/60 - 17s - loss: 0.0695 - lwlrap: 0.2032 - val_loss: 0.0892 - val_lwlrap: 0.8574
+Epoch 18/85
+60/60 - 16s - loss: 0.0584 - lwlrap: 0.2224 - val_loss: 0.0763 - val_lwlrap: 0.8488
+Epoch 19/85
+60/60 - 16s - loss: 0.0138 - lwlrap: 0.2309 - val_loss: 0.0757 - val_lwlrap: 0.8509
+Epoch 20/85
+60/60 - 17s - loss: 0.0171 - lwlrap: 0.2137 - val_loss: 0.0872 - val_lwlrap: 0.8543
+Epoch 21/85
+60/60 - 16s - loss: 0.0164 - lwlrap: 0.2131 - val_loss: 0.0910 - val_lwlrap: 0.8623
+Epoch 22/85
+60/60 - 16s - loss: 0.0176 - lwlrap: 0.2402 - val_loss: 0.0965 - val_lwlrap: 0.8509
+Epoch 23/85
+60/60 - 17s - loss: 0.0717 - lwlrap: 0.2113 - val_loss: 0.1031 - val_lwlrap: 0.8471
+Epoch 24/85
+60/60 - 16s - loss: 0.0169 - lwlrap: 0.2287 - val_loss: 0.0768 - val_lwlrap: 0.8607
+Epoch 25/85
+60/60 - 16s - loss: 0.0101 - lwlrap: 0.2367 - val_loss: 0.0769 - val_lwlrap: 0.8597
+Epoch 26/85
+60/60 - 16s - loss: 0.0116 - lwlrap: 0.2265 - val_loss: 0.0988 - val_lwlrap: 0.8547
+Epoch 27/85
+60/60 - 17s - loss: 0.0597 - lwlrap: 0.2086 - val_loss: 0.1097 - val_lwlrap: 0.8408
+Epoch 28/85
+60/60 - 17s - loss: 0.0590 - lwlrap: 0.2315 - val_loss: 0.1054 - val_lwlrap: 0.8413
+Epoch 29/85
+60/60 - 16s - loss: 0.0123 - lwlrap: 0.2350 - val_loss: 0.1127 - val_lwlrap: 0.8542
+Epoch 30/85
+60/60 - 17s - loss: 0.0417 - lwlrap: 0.2270 - val_loss: 0.0877 - val_lwlrap: 0.8551
+Epoch 31/85
+60/60 - 16s - loss: 0.0655 - lwlrap: 0.2316 - val_loss: 0.0978 - val_lwlrap: 0.8507
+Epoch 32/85
+60/60 - 17s - loss: 0.0050 - lwlrap: 0.2267 - val_loss: 0.0907 - val_lwlrap: 0.8554
+Epoch 33/85
+60/60 - 17s - loss: 0.0086 - lwlrap: 0.2157 - val_loss: 0.1003 - val_lwlrap: 0.8589
+Epoch 34/85
+60/60 - 16s - loss: 0.0079 - lwlrap: 0.2307 - val_loss: 0.0685 - val_lwlrap: 0.8573
+Epoch 35/85
+60/60 - 17s - loss: 0.0086 - lwlrap: 0.2368 - val_loss: 0.0965 - val_lwlrap: 0.8554
+
+-------------   Fold 2 / 5  -------------
+
+ -> Using 2921 pseudo labels 
+
+ -> Preparing Data 
+
+ -> Preparing Model 
+
+ -> Loading weights from ../logs/2021-01-31/8/pretrained_best_fold1.h5
+
+ -> Training Model 
+
+Epoch 1/85
+60/60 - 18s - loss: 0.1655 - lwlrap: 0.1716 - val_loss: 0.0944 - val_lwlrap: 0.8099
+Epoch 2/85

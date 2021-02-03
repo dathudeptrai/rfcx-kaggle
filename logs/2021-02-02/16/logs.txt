@@ -1,0 +1,14 @@
+
+-------------   Fold 1 / 5  -------------
+
+ -> Using 2727 pseudo labels 
+
+ -> Preparing Data 
+
+ -> Preparing Model 
+
+ -> Loading weights from ../logs/2021-01-31/8/pretrained_best_fold0.h5
+
+ -> Training Model 
+
+Epoch 1/85

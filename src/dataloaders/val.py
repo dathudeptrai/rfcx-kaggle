@@ -1,4 +1,3 @@
-import os
 import math
 import random
 import numpy as np
@@ -7,18 +6,8 @@ import nlpaug.flow as naf
 import nlpaug.augmenter.spectrogram as nas
 
 from sklearn.utils import shuffle
-from collections import defaultdict
 
-from params import TRAIN_MELS_PATH, TEST_MELS_PATH
-
-
-os.environ["TF_DETERMINISTIC_OPS"] = "1"
-random.seed(42)
-np.random.seed(42)
-tf.random.set_seed(42)
-
-HOP_SIZE_RATIO = 50
-NUM_FEATURES = 128
+from params import HOP_SIZE_RATIO, NUM_FEATURES
 
 
 class MelSampler(tf.keras.utils.Sequence):

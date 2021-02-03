@@ -1,5 +1,3 @@
-import os
-import math
 import random
 import numpy as np
 import tensorflow as tf
@@ -9,23 +7,14 @@ import nlpaug.augmenter.spectrogram as nas
 from sklearn.utils import shuffle
 from collections import defaultdict
 
-from params import TRAIN_MELS_PATH, TEST_MELS_PATH
-
-
-os.environ["TF_DETERMINISTIC_OPS"] = "1"
-random.seed(42)
-np.random.seed(42)
-tf.random.set_seed(42)
-
-HOP_SIZE_RATIO = 50
-NUM_FEATURES = 128
+from params import HOP_SIZE_RATIO
 
 
 class BalancedMelSamplerPL(tf.keras.utils.Sequence):
     def __init__(
         self,
         dict_data,
-        pl_data, 
+        pl_data,
         pl_threshold=0.5,
         batch_size=64,
         max_length=384,
@@ -139,21 +128,26 @@ class BalancedMelSamplerPL(tf.keras.utils.Sequence):
 
     def __len__(self):
         return 1000
-        
+
     def _getitem_pl(self, batch_size):
         x, ys, y_seg = [], [], []
 
         recordings = np.random.choice(list(self.pl_data.keys()), batch_size)
-        
+
         for recording in recordings:
             melspec, y = self.pl_data[recording]
 
             y_crop = 0
             while np.max(y_crop) < self.pl_threshold:
                 crop_start = np.random.randint(0, melspec.shape[0] - self.max_length)
-                y_crop = y[crop_start : crop_start + self.max_length]
+                y_crop = y[crop_start: crop_start + self.max_length]
 
-            x.append(melspec[crop_start : crop_start + self.max_length])
+            melspec = melspec[crop_start: crop_start + self.max_length]
+
+            # if self.is_train and np.random.random() <= 0.5:  # add cutmix ?
+            #     melspec = self.augment.augment(melspec)
+
+            x.append(melspec)
             y_seg.append(y_crop)
             ys.append(y_crop.max(0))
 
@@ -286,26 +280,6 @@ class BalancedMelSamplerPL(tf.keras.utils.Sequence):
         samples["y_tp"] = categorical_batch_y_tp
         samples["y_seg_tp"] = batch_y_seg_aug
         return samples
-
-    # def __getitem__(self, index):
-    #     samples = {}
-
-    #     batch_x_aug_tp, categorical_batch_y_tp, batch_y_seg_aug, _ = self._getitem(
-    #         self.tp_samples,
-    #         self.dict_data,
-    #         self.batch_size - int(self.batch_size * self.pl_prop),
-    #         use_cutmix=self.use_cutmix,
-    #         shuffle_aug=self.shuffle_aug,
-    #     )
-    #     x_pl, y_pl, y_seg_pl = self._getitem_pl(
-    #         int(self.batch_size * self.pl_prop),
-    #     )
-
-    #     samples["x_tp"] = np.concatenate([batch_x_aug_tp, x_pl], 0)
-    #     samples["y_tp"] = np.concatenate([categorical_batch_y_tp, y_pl], 0)
-    #     samples["y_seg_tp"] = np.concatenate([batch_y_seg_aug, y_seg_pl], 0)
-
-    #     return samples
 
     def random_sample(
         self, r, x, start, end, chunk_len, augment=False, shuffle_aug=False

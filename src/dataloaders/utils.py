@@ -1,3 +1,9 @@
+import os
+import numpy as np
+
+from params import TRAIN_MELS_PATH, TEST_MELS_PATH
+
+
 def csv_to_dict(csv_data):
     dict_data = {}
 
