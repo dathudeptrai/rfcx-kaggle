@@ -1,0 +1,11 @@
+
+-------------   Fold 1 / 5  -------------
+
+ -> Preparing Data 
+
+ -> Preparing Model 
+
+ -> Loading weights from ../logs/2021-02-04/3/pretrained_best_fold0.h5
+
+Traceback (most recent call last):
+

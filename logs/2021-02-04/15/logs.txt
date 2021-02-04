@@ -1,0 +1,30 @@
+
+-------------   Fold 1 / 5  -------------
+
+ -> Preparing Data 
+
+ -> Preparing Model 
+
+ -> Loading weights from ../logs/2021-02-04/3/pretrained_best_fold0.h5
+
+ -> Training Model 
+
+Epoch 1/100
+15/15 - 8s - loss: 0.3980 - lwlrap: 0.2137 - val_loss: 0.1960 - val_lwlrap: 0.2720
+Epoch 2/100
+15/15 - 6s - loss: 0.1744 - lwlrap: 0.2371 - val_loss: 0.2687 - val_lwlrap: 0.2416
+Epoch 3/100
+15/15 - 6s - loss: 0.1783 - lwlrap: 0.2892 - val_loss: 0.3449 - val_lwlrap: 0.2315
+Epoch 4/100
+15/15 - 6s - loss: 0.3214 - lwlrap: 0.3590 - val_loss: 0.1218 - val_lwlrap: 0.6123
+Epoch 5/100
+15/15 - 6s - loss: 0.1457 - lwlrap: 0.3825 - val_loss: 0.1045 - val_lwlrap: 0.6950
+Epoch 6/100
+15/15 - 6s - loss: 0.2484 - lwlrap: 0.5259 - val_loss: 0.0882 - val_lwlrap: 0.7884
+Epoch 7/100
+15/15 - 6s - loss: 0.2445 - lwlrap: 0.5417 - val_loss: 0.0863 - val_lwlrap: 0.8031
+Epoch 8/100
+15/15 - 6s - loss: 0.1017 - lwlrap: 0.5332 - val_loss: 0.0871 - val_lwlrap: 0.8021
+Epoch 9/100
+15/15 - 6s - loss: 0.2633 - lwlrap: 0.5623 - val_loss: 0.1058 - val_lwlrap: 0.7937
+Epoch 10/100

@@ -51,6 +51,6 @@ def get_callbacks(pretrained_with_contrastive=False, fold_id=0, saved_path=""):
         save_freq="epoch",
     )
     early_stopping = tf.keras.callbacks.EarlyStopping(
-        patience=25, monitor="val_lwlrap", mode="max"
+        patience=30, monitor="val_lwlrap", mode="max"
     )
     return [model_checkpoint, early_stopping]
