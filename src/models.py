@@ -263,9 +263,12 @@ class Classifier(DeepMetricLearning):
         logits = self(x_tp, training=True)
 
         # compute loss and calculate gradients
-        cls_loss = self.moving_average_bce(
-            y_tp, logits, data["r"], self.optimizer.iterations, data["is_cutmix"][0]
-        )
+        # cls_loss = self.moving_average_bce(
+        #     y_tp, logits, data["r"], self.optimizer.iterations, data["is_cutmix"][0]
+        # )
+
+        cls_loss = self.moving_average_bce(y_tp, data["y_fp"], logits)
+
         self._apply_gradients(cls_loss)
 
         self.metrics[0].update_state(y_tp, logits)

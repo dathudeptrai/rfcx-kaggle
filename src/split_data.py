@@ -9,6 +9,8 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 def get_split(fold=0):
     df = pd.read_csv("../data/new_train_tp.csv")
+    df_fp = pd.read_csv("../data/new_train_fp.csv")
+
     table = (
         df.groupby("raw_recording_id")["species_id"]
         .apply(
@@ -43,4 +45,9 @@ def get_split(fold=0):
         if df.iloc[i]["raw_recording_id"] in splits[fold][1]:
             valid_idx.append(i)
 
-    return train_idx, valid_idx
+    train_idx_fp = []
+    for i in range(len(df_fp)):
+        if df_fp.iloc[i]["raw_recording_id"] not in splits[fold][1]:
+            train_idx_fp.append(i)
+
+    return train_idx, valid_idx, train_idx_fp
