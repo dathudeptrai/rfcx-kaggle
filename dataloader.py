@@ -61,6 +61,7 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
     def __init__(
         self,
         dict_data,
+        fp_dict_data,
         batch_size=64,
         max_length=384,
         is_train=True,
@@ -71,6 +72,7 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
         shuffle_aug=False,
     ):
         self.dict_data = dict_data
+        self.fp_dict_data = fp_dict_data
         self.batch_size = batch_size
         self.max_length = max_length
 
@@ -90,14 +92,18 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
         self.fp_samples = None
         self.tp_samples = defaultdict(list)
         self.non_apply_cutmix_recording_ids = []
+        self.fp_r_to_labels = {}
 
         if self.cache:
-            self._cache_samples(self.tp_samples, self.dict_data)
+            self._cache_samples(self.tp_samples, self.dict_data, is_tp=True)
+            if fp_dict_data is not None:
+                self.fp_samples = defaultdict(list)
+                self._cache_samples(self.fp_samples, self.fp_dict_data, is_tp=False)
 
         if self.is_train:
             self.on_epoch_end()
 
-    def _cache_samples(self, samples, dict_data):
+    def _cache_samples(self, samples, dict_data, is_tp=True):
         for k in tqdm(list(dict_data.keys())):
             if len(self.find_all_same_recording_id(k)) >= 2:
                 self.non_apply_cutmix_recording_ids.append(k)
@@ -105,8 +111,10 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
                 label_segment = segment[0]
                 samples[str(label_segment)].append(
                     {
-                        "start_index": int(segment[2] * HOP_SIZE_RATIO),
-                        "end_index": int(segment[4] * HOP_SIZE_RATIO),
+                        "start_index": int(segment[2] * HOP_SIZE_RATIO) if is_tp else 0,
+                        "end_index": int(segment[4] * HOP_SIZE_RATIO)
+                        if is_tp
+                        else 60 * HOP_SIZE_RATIO,
                         "recording_id": k,
                     }
                 )
@@ -119,26 +127,41 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
                 all_recording_ids.append(k)
         return all_recording_ids
 
-    def return_label_in_segment(self, recording_id, t_min, t_max):
+    def return_label_in_segment(self, recording_id, t_min, t_max, is_tp=True):
+        dict_data = self.dict_data if is_tp is True else self.fp_dict_data
         labels = []
         all_recording_ids = []
-        for k in self.dict_data.keys():
-            real_recording_id = k.split("_")[0]
-            if str(real_recording_id) == str(recording_id.split("_")[0]):
-                all_recording_ids.append(k)
-        for recording_id in all_recording_ids:
-            all_segments = [self.dict_data[recording_id][0]]
-            for segment in all_segments:
-                s = int(segment[2] * HOP_SIZE_RATIO)
-                e = int(segment[4] * HOP_SIZE_RATIO)
-                _len = e - s
-                if (
-                    (t_min in range(s + int(0.25 * _len), e - int(0.25 * _len)))
-                    or (t_max in range(s + int(0.25 * _len), e - int(0.25 * _len)))
-                    or (t_min <= s and t_max >= e)
-                    or ((t_min >= s and t_max <= e) and ((t_max - t_min) >= 0.5 * _len))
-                ):
-                    labels.append(segment[0])
+        if recording_id in self.fp_r_to_labels and is_tp is False:
+            return self.fp_r_to_labels[recording_id]
+        else:
+            for k in dict_data.keys():
+                real_recording_id = k.split("_")[0]
+                if str(real_recording_id) == str(recording_id.split("_")[0]):
+                    all_recording_ids.append(k)
+            for recording_id in all_recording_ids:
+                all_segments = [dict_data[recording_id][0]]
+                for segment in all_segments:
+                    if is_tp:
+                        s = int(segment[2] * HOP_SIZE_RATIO)
+                        e = int(segment[4] * HOP_SIZE_RATIO)
+                        _len = e - s
+                        if (
+                            (t_min in range(s + int(0.25 * _len), e - int(0.25 * _len)))
+                            or (
+                                t_max
+                                in range(s + int(0.25 * _len), e - int(0.25 * _len))
+                            )
+                            or (t_min <= s and t_max >= e)
+                            or (
+                                (t_min >= s and t_max <= e)
+                                and ((t_max - t_min) >= 0.5 * _len)
+                            )
+                        ):
+                            labels.append(segment[0])
+                    else:
+                        labels.append(segment[0])
+            if recording_id not in self.fp_r_to_labels:
+                self.fp_r_to_labels[recording_id] = labels
         return labels
 
     def on_epoch_end(self):
@@ -149,6 +172,13 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
                 (key, shuffle(self.tp_samples[key])) for key in all_keys
             ]
             self.tp_samples = dict(shuffle_tp_samples)
+            if self.fp_dict_data is not None:
+                all_keys = list(self.fp_samples.keys())
+                random.shuffle(all_keys)
+                shuffle_fp_samples = [
+                    (key, shuffle(self.fp_samples[key])) for key in all_keys
+                ]
+                self.fp_samples = dict(shuffle_fp_samples)
 
     def __len__(self):
         return 1000
@@ -158,6 +188,7 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
         samples,
         dict_data,
         batch_size,
+        is_tp=True,
         use_cutmix=False,
         class_idxs=None,
         shuffle_aug=False,
@@ -218,6 +249,7 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
                 x,
                 start,
                 end,
+                is_tp=is_tp,
                 chunk_len=random_chunk_len,
                 augment=self.is_train,
                 shuffle_aug=shuffle_aug,
@@ -268,6 +300,7 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
             self.tp_samples,
             self.dict_data,
             self.batch_size,
+            is_tp=True,
             use_cutmix=self.use_cutmix,
             shuffle_aug=self.shuffle_aug,
         )
@@ -275,16 +308,35 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
         samples["y_tp"] = categorical_batch_y_tp
         samples["r"] = batch_r
         samples["is_cutmix"] = np.array([is_cutmix])
+        if self.fp_samples is not None:
+            (
+                batch_x_aug_fp,
+                categorical_batch_y_fp,
+                _,
+                batch_r_fp,
+                is_cutmix,
+            ) = self._getitem(
+                self.fp_samples,
+                self.fp_dict_data,
+                self.batch_size,
+                is_tp=False,
+                use_cutmix=False,
+                class_idxs=random_class_idxs,
+                shuffle_aug=False,
+            )
+            samples["x_fp"] = batch_x_aug_fp
+            samples["y_fp"] = categorical_batch_y_fp
+            samples["r_fp"] = batch_r_fp
         return samples
 
     def random_sample(
-        self, r, x, start, end, chunk_len, augment=False, shuffle_aug=False
+        self, r, x, start, end, chunk_len, is_tp=True, augment=False, shuffle_aug=False
     ):
         if (end - start) == chunk_len:
             x_aug = x[start:end]
             s_aug = 0
             e_aug = chunk_len
-            extra_labels = self.return_label_in_segment(r, start, end)
+            extra_labels = self.return_label_in_segment(r, start, end, is_tp)
         elif (end - start) > chunk_len:
             mel_segment = x[start:end]
             s_random = random.choice(range(0, (end - start - chunk_len)))
@@ -293,7 +345,7 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
             s_aug = 0
             e_aug = chunk_len
             extra_labels = self.return_label_in_segment(
-                r, start + s_random, start + e_random
+                r, start + s_random, start + e_random, is_tp
             )
         else:
             # chunk MUST include all mel_segment
@@ -309,7 +361,10 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
                 s_aug = random_shift_left
                 e_aug = s_aug + (end - start)
                 extra_labels = self.return_label_in_segment(
-                    r, start - random_shift_left, start - random_shift_left + chunk_len
+                    r,
+                    start - random_shift_left,
+                    start - random_shift_left + chunk_len,
+                    is_tp,
                 )
             else:
                 shift_left_more = start - random_shift_left + chunk_len - len(x)
@@ -320,7 +375,10 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
                 s_aug = random_shift_left
                 e_aug = s_aug + (end - start)
                 extra_labels = self.return_label_in_segment(
-                    r, start - random_shift_left, start - random_shift_left + chunk_len
+                    r,
+                    start - random_shift_left,
+                    start - random_shift_left + chunk_len,
+                    is_tp,
                 )
 
         # augment here

@@ -84,11 +84,14 @@ def get_callbacks(fold_id=0, saved_path=""):
 @click.option("--saved_path", default="", show_default=True)
 @click.option("--pretrained_path", default="", show_default=True)
 @click.option("--pretrained_with_contrastive", default=0, show_default=True)
+@click.option("--use_fp", default=0, show_default=True)
 def main(
-    backbone_name, fold_idx, saved_path, pretrained_path, pretrained_with_contrastive
+    backbone_name, fold_idx, saved_path, pretrained_path, pretrained_with_contrastive, use_fp
 ):
     train_data = pd.read_csv("./data/new_train_tp.csv")
+    fp_data = pd.read_csv("./data/new_train_fp.csv")
     pretrained_with_contrastive = bool(pretrained_with_contrastive)
+    use_fp = bool(use_fp) and (not pretrained_with_contrastive)
 
     os.makedirs(os.path.join(saved_path, f"fold{fold_idx}"), exist_ok=True)
     model = get_model(
@@ -105,14 +108,30 @@ def main(
     fold_train_dict = convert_csv_to_dict_for_dataloader(train_data.iloc[train_index])
     fold_valid_dict = convert_csv_to_dict_for_dataloader(train_data.iloc[val_index])
 
+    # convert fp to dictionary
+    # only use fp samples that its recording_id not in tp_recording_id
+    # just want to prevent unknow conflic.
+    if use_fp:
+        all_tp_recording_ids = train_data["raw_recording_id"].tolist()
+        fp_non_overlape_tp = []
+        for i in range(len(fp_data)):
+            if fp_data.iloc[i]["raw_recording_id"] not in all_tp_recording_ids:
+                fp_non_overlape_tp.append(i)
+        fp_data = fp_data.iloc[fp_non_overlape_tp]
+        fp_dict_data = convert_csv_to_dict_for_dataloader(fp_data)
+    else:
+        fp_dict_data = None
+
+
     # create dataloader
     balanced_train_data_loader = BalancedMelSampler(
         fold_train_dict,
+        fp_dict_data=fp_dict_data,
         batch_size=64,
         max_length=NUM_FRAMES,
         is_train=True,
         n_classes=24,
-        use_cutmix=True,
+        use_cutmix=False if use_fp else True,
         cache=True,
         n_classes_in_batch=8,
         shuffle_aug=False,
