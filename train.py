@@ -100,6 +100,8 @@ def main(
         pretrained_with_contrastive=pretrained_with_contrastive,
         pretrained_path=pretrained_path,
     )
+    # set use_fp for model
+    model.use_fp = use_fp
 
     # get train_idx and valid_idx
     train_index, val_index = get_split(fold=fold_idx)

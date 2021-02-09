@@ -21,6 +21,7 @@ class DeepMetricLearning(tf.keras.Model):
         self.backbone._name = "backbone_global"
         self.fc = tf.keras.layers.Dense(units=128, activation="relu", name="fc")
         self.pooling = tf.keras.layers.GlobalAveragePooling2D(name="pooling")
+        self.use_fp = False
 
     def _build(self):
         inputs = tf.keras.layers.Input(
@@ -107,6 +108,7 @@ class Classifier(DeepMetricLearning):
             units=512, activation=tf.nn.relu, name="dense_global_cls"
         )
         self.logits = tf.keras.layers.Dense(units=24, activation=None, dtype=tf.float32)
+        self.use_fp = False
 
     def call(self, inputs, training=False):
         features = self.backbone(inputs, training=training)
@@ -117,26 +119,66 @@ class Classifier(DeepMetricLearning):
         x = self.logits(x)
         return x
 
+    def compute_tp_loss(self, y_tp, pred_tp, from_logits=False):
+        if from_logits:
+            pred_tp = tf.nn.sigmoid(pred_tp)
+        epsilon_ = tf.convert_to_tensor(tf.keras.backend.epsilon(), pred_tp.dtype)
+        pred_tp = tf.clip_by_value(pred_tp, epsilon_, 1.0 - epsilon_)
+        bce = y_tp * tf.math.log(pred_tp + tf.keras.backend.epsilon())
+        return -1.0 * tf.reduce_mean(bce)
+
+    def compute_fp_loss(self, y_fp, pred_fp, from_logits=False):
+        if from_logits:
+            pred_fp = tf.nn.sigmoid(pred_fp)
+        epsilon_ = tf.convert_to_tensor(tf.keras.backend.epsilon(), pred_fp.dtype)
+        pred_fp = tf.clip_by_value(pred_fp, epsilon_, 1.0 - epsilon_)
+        bce = y_fp * tf.math.log(1.0 - pred_fp + tf.keras.backend.epsilon())
+        return -1.0 * tf.reduce_mean(bce)
+
     @tf.function
     def train_step(self, data):
         data = data[0]
         x_tp, y_tp = data["x_tp"], data["y_tp"]
 
-        # forward step
-        logits = self(x_tp, training=True)
+        if self.use_fp:
+            logits_tp = self(x_tp, training=True)
+            cls_tp_loss = self.compute_tp_loss(y_tp, logits_tp, from_logits=True)
+            self._apply_gradients(cls_tp_loss)
 
-        # compute loss and calculate gradients
-        cls_loss = self.moving_average_bce(
-            y_tp, logits, data["r"], self.optimizer.iterations, data["is_cutmix"][0]
-        )
-        self._apply_gradients(cls_loss)
+            # fp optimize
+            x_fp, y_fp = data["x_fp"], data["y_fp"]
+            logits_fp = self(x_fp, training=True)
+            cls_fp_loss = self.compute_fp_loss(y_fp, logits_fp, from_logits=True)
+            self._apply_gradients(cls_fp_loss)
 
-        self.metrics[0].update_state(y_tp, logits)
+            self.metrics[0].update_state(y_tp, logits_tp)
 
-        # return result
-        results = {}
-        results.update({"loss": cls_loss, "lwlrap": self.metrics[0].result()})
-        return results
+            # return result
+            results = {}
+            results.update(
+                {
+                    "tp_loss": cls_tp_loss,
+                    "fp_loss": cls_fp_loss,
+                    "lwlrap": self.metrics[0].result(),
+                }
+            )
+            return results
+        else:
+            # forward step
+            logits = self(x_tp, training=True)
+
+            # compute loss and calculate gradients
+            cls_loss = self.moving_average_bce(
+                y_tp, logits, data["r"], self.optimizer.iterations, data["is_cutmix"][0]
+            )
+            self._apply_gradients(cls_loss)
+
+            self.metrics[0].update_state(y_tp, logits)
+
+            # return result
+            results = {}
+            results.update({"loss": cls_loss, "lwlrap": self.metrics[0].result()})
+            return results
 
     @tf.function
     def test_step(self, data):
