@@ -9,7 +9,7 @@ from backbones.efficientnet import (
 from backbones.inception_resnet_v2 import InceptionResNetV2
 from backbones.inceptionv3 import InceptionV3
 from backbones.resnet_v2 import ResNet50V2, ResNet101V2, ResNet152V2
-from backbones.resnext import ResNeXt50
+from backbones.resnet_ext import ResNeXt50, ResNet18, ResNet34, ResNeSt50
 from backbones.xception import Xception
 
 
@@ -45,6 +45,10 @@ class ModelFactory(object):
             return Xception(include_top=False, use_mixstyle=use_mixstyle)
 
         # Resnet
+        elif name == "resnet18":
+            return ResNet18(include_top=False, use_mixstyle=use_mixstyle)
+        elif name == "resnet34":
+            return ResNet34(include_top=False, use_mixstyle=use_mixstyle)
         elif name == "resnet50":
             return ResNet50V2(include_top=False, use_mixstyle=use_mixstyle)
         elif name == "resnet101":
@@ -52,6 +56,8 @@ class ModelFactory(object):
         elif name == "resnet152":
             return ResNet152V2(include_to0=False, use_mixstyle=use_mixstyle)
         elif name == "resnext50":
-            return ResNeXt50(include_top=False, weights="swsl", use_mixstyle=True)
+            return ResNeXt50(include_top=False, weights="swsl", use_mixstyle=use_mixstyle)
+        elif name == "resnest50":
+            return ResNeSt50(include_top=False, use_mixstyle=use_mixstyle)
         else:
             raise NotImplementedError

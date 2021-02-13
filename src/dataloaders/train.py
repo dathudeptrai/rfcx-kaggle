@@ -14,7 +14,6 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
     def __init__(
         self,
         dict_data,
-        dict_data_fp,
         batch_size=64,
         max_length=384,
         n_classes=24,
@@ -22,7 +21,6 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
         n_classes_in_batch=16,
     ):
         self.dict_data = dict_data
-        self.dict_data_fp = dict_data_fp
         self.batch_size = batch_size
         self.max_length = max_length
 
@@ -63,29 +61,20 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
         for k in self.dict_data.keys():
             if str(real_recording_id) == str(k.split("_")[0]):
                 all_recording_ids.append(k)
-        for k in self.dict_data_fp.keys():
-            if str(real_recording_id) == str(k.split("_")[0]):
-                all_recording_ids.append(k)
         return all_recording_ids
 
-    def _return_label_in_segment(self, recording_id, t_min, t_max, fp=False):
+    def return_label_in_segment(self, recording_id, t_min, t_max):
         y = np.zeros((t_max - t_min, 24))
 
         labels = []
         all_recording_ids = []
-
-        keys = self.dict_data_fp.keys() if fp else self.dict_data.keys()
-        for k in keys:
+        for k in self.dict_data.keys():
             real_recording_id = k.split("_")[0]
             if str(real_recording_id) == str(recording_id.split("_")[0]):
                 all_recording_ids.append(k)
 
         for recording_id in all_recording_ids:
-            if fp:
-                all_segments = [self.dict_data_fp[recording_id][0]]
-            else:
-                all_segments = [self.dict_data[recording_id][0]]
-
+            all_segments = [self.dict_data[recording_id][0]]
             for segment in all_segments:
                 s = int(segment[2] * HOP_SIZE_RATIO)
                 e = int(segment[4] * HOP_SIZE_RATIO)
@@ -105,12 +94,6 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
                     y[frame_min:frame_max, segment[0]] = 1
 
         return labels, y
-
-    def return_label_in_segment(self, recording_id, t_min, t_max):
-        labels, y = self._return_label_in_segment(recording_id, t_min, t_max, False)
-        labels_fp, y_fp = self._return_label_in_segment(recording_id, t_min, t_max, True)
-
-        return labels, y, labels_fp, y_fp
 
     def on_epoch_end(self):
         all_keys = list(self.tp_samples.keys())
@@ -171,8 +154,6 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
         batch_e_aug = []
         batch_y_aug = []
         batch_y_seg_aug = []
-        batch_y_aug_fp = []
-        batch_y_seg_aug_fp = []
 
         # random chunk length for sampling
         if self.max_length is not None:
@@ -185,7 +166,7 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
             )
 
         for i, (r, x, start, end) in enumerate(zip(batch_r, batch_x, batch_s, batch_e)):
-            x_aug, s_aug, e_aug, extra_labels, y, extra_labels_fp, y_fp = self.random_sample(
+            x_aug, s_aug, e_aug, extra_labels, y = self.random_sample(
                 r,
                 x,
                 start,
@@ -197,8 +178,6 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
             batch_e_aug.append(e_aug)
             batch_y_aug.append(extra_labels)
             batch_y_seg_aug.append(y)
-            batch_y_aug_fp.append(extra_labels_fp)
-            batch_y_seg_aug_fp.append(y_fp)
 
         batch_x_aug = np.reshape(np.array(batch_x_aug), (len(batch_x), -1, 128, 3))
         categorical_batch_y = np.zeros(
@@ -208,45 +187,27 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
             for label in extra_label:
                 categorical_batch_y[i, label] = 1.0
 
-        categorical_batch_y_fp = np.zeros(
-            shape=[len(batch_y_aug_fp), self.n_classes], dtype=np.float32
-        )
-        for i, extra_label in enumerate(batch_y_aug_fp):
-            for label in extra_label:
-                categorical_batch_y[i, label] = 1.0
-
         batch_r = np.array(batch_r)
         batch_y_seg_aug = np.array(batch_y_seg_aug)
-        batch_y_seg_aug_fp = np.array(batch_y_seg_aug_fp)
 
         mix = False
-        use_cutmix = False
         if use_cutmix and np.random.random() <= 0.5:
-            if np.random.random() <= 0.5:
+            if np.random.random() <= 0:
+                batch_x_aug, categorical_batch_y, batch_y_seg_aug = self._cutmix(
+                    batch_r,
+                    batch_x_aug,
+                    batch_s_aug,
+                    batch_e_aug,
+                    categorical_batch_y,
+                    batch_y_seg_aug,
+                    random_chunk_len,
+                )
+            else:
                 batch_x_aug, categorical_batch_y, batch_y_seg_aug = self._mixup(
                     batch_x_aug,
                     categorical_batch_y,
                     batch_y_seg_aug,
                 )
-
-                batch_x_aug = np.reshape(batch_x_aug, (len(batch_x_aug), -1, 128, 3))
-                categorical_batch_y = np.reshape(
-                    categorical_batch_y, (len(categorical_batch_y), -1)
-                )
-
-                batch_y_seg_aug = np.reshape(
-                    batch_y_seg_aug, (len(batch_y_seg_aug), -1, 24)
-                )
-
-            batch_x_aug, categorical_batch_y, batch_y_seg_aug = self._cutmix(
-                batch_r,
-                batch_x_aug,
-                batch_s_aug,
-                batch_e_aug,
-                categorical_batch_y,
-                batch_y_seg_aug,
-                random_chunk_len,
-            )
 
             batch_x_aug = np.reshape(batch_x_aug, (len(batch_x_aug), -1, 128, 3))
             categorical_batch_y = np.reshape(
@@ -258,15 +219,7 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
             )
             mix = True
 
-        return (
-            batch_x_aug,
-            categorical_batch_y,
-            batch_y_seg_aug,
-            categorical_batch_y_fp,
-            batch_y_seg_aug_fp,
-            batch_r,
-            mix
-        )
+        return batch_x_aug, categorical_batch_y, batch_y_seg_aug, batch_r, mix
 
     def __getitem__(self, index):
         samples = {}
@@ -274,8 +227,6 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
             batch_x_aug_tp,
             categorical_batch_y_tp,
             batch_y_seg_aug,
-            categorical_batch_y_fp,
-            batch_y_seg_aug_fp,
             batch_r,
             is_cutmix
         ) = self._getitem(
@@ -288,8 +239,6 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
         samples["x_tp"] = batch_x_aug_tp
         samples["y_tp"] = categorical_batch_y_tp
         samples["y_seg_tp"] = batch_y_seg_aug
-        samples["y_fp"] = categorical_batch_y_fp
-        samples["y_seg_fp"] = batch_y_seg_aug_fp
         samples["r"] = batch_r
         samples["is_cutmix"] = np.array([is_cutmix])
         return samples
@@ -301,7 +250,7 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
             x_aug = x[start:end]
             s_aug = 0
             e_aug = chunk_len
-            extra_labels, y, extra_labels_fp, y_fp = self.return_label_in_segment(r, start, end)
+            extra_labels, y = self.return_label_in_segment(r, start, end)
         elif (end - start) > chunk_len:
             mel_segment = x[start:end]
             s_random = random.choice(range(0, (end - start - chunk_len)))
@@ -309,7 +258,7 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
             x_aug = mel_segment[s_random:e_random]
             s_aug = 0
             e_aug = chunk_len
-            extra_labels, y, extra_labels_fp, y_fp = self.return_label_in_segment(
+            extra_labels, y = self.return_label_in_segment(
                 r, start + s_random, start + e_random
             )
         else:
@@ -325,7 +274,7 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
                 ]
                 s_aug = random_shift_left
                 e_aug = s_aug + (end - start)
-                extra_labels, y, extra_labels_fp, y_fp = self.return_label_in_segment(
+                extra_labels, y = self.return_label_in_segment(
                     r, start - random_shift_left, start - random_shift_left + chunk_len
                 )
             else:
@@ -336,7 +285,7 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
                 ]
                 s_aug = random_shift_left
                 e_aug = s_aug + (end - start)
-                extra_labels, y, extra_labels_fp, y_fp = self.return_label_in_segment(
+                extra_labels, y = self.return_label_in_segment(
                     r, start - random_shift_left, start - random_shift_left + chunk_len
                 )
 
@@ -346,20 +295,16 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
             x_aug = self.specaugment.augment(x_aug)
         x_aug[s_aug:e_aug] = x_aug_original[s_aug:e_aug]
 
-        return x_aug, s_aug, e_aug, extra_labels, y, extra_labels_fp, y_fp
+        return x_aug, s_aug, e_aug, extra_labels, y
 
-    def _cutmix(self, r, x, s, e, y, y_seg, y_fp, y_seg_fp, random_chunk_len):
+    def _cutmix(self, r, x, s, e, y, y_seg, random_chunk_len):
         x_aug = []
         y_aug = []
         y_seg_aug = []
-        y_aug_fp = []
-        y_seg_aug_fp = []
         for i in range(len(x)):
             original_sample = x[i]
             original_label = y[i]
             original_label_seg = y_seg[i]
-            original_label_fp = y_fp[i]
-            original_label_seg_fp = y_seg_fp[i]
             original_s = s[i]
             original_e = e[i]
             mixed_sample_idex = np.random.choice(
@@ -374,15 +319,12 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
                 # right cutmix
                 cutmix_sample = np.copy(original_sample)
                 cutmix_y_seg = np.copy(original_label_seg)
-                cutmix_y_seg_fp = np.copy(original_label_seg_fp)
                 (
                     cutmix_sample[original_e:random_chunk_len],
                     _s,
                     _e,
                     _labels,
-                    cutmix_y_seg[original_e:random_chunk_len],
-                    _labels_fp,
-                    cutmix_y_seg_fp[original_e:random_chunk_len]
+                    cutmix_y_seg[original_e:random_chunk_len]
                 ) = self.random_sample(
                     r_mixed_sample,
                     self.dict_data[r_mixed_sample][-1],
@@ -396,19 +338,9 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
                 cutmix_label = np.clip(
                     np.array(original_label) + np.array(mixed_label), 0, 1
                 )
-
-                mixed_label_fp = np.zeros_like(original_label_fp)
-                for lab in _labels_fp:
-                    mixed_label_fp[lab] = 1.0
-                cutmix_label_fp = np.clip(
-                    np.array(original_label_fp) + np.array(mixed_label_fp), 0, 1
-                )
-
                 x_aug.append(cutmix_sample)
                 y_aug.append(cutmix_label)
                 y_seg_aug.append(cutmix_y_seg)
-                y_aug_fp.append(cutmix_label_fp)
-                y_seg_aug_fp.append(cutmix_y_seg_fp)
 
             elif (
                 (random_chunk_len - original_e) < original_s

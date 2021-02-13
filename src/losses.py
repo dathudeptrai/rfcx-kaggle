@@ -123,28 +123,3 @@ class MovingAverageBCE(tf.keras.losses.Loss):
             y_true_update = tf.gather(self.moving_average_labels, index)
             batch_bce = self.bce(y_true_update, y_pred)
             return tf.reduce_mean(batch_bce)
-
-
-class TPFPBCE(tf.keras.losses.Loss):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.bce = tf.keras.losses.BinaryCrossentropy(
-            from_logits=True, reduction=tf.keras.losses.Reduction.NONE
-        )
-
-    def __call__(self, y_tp, y_fp, y_pred):
-
-        y_pred = tf.nn.sigmoid(y_pred)
-        eps = tf.convert_to_tensor(tf.keras.backend.epsilon(), y_pred.dtype)
-        y_pred = tf.clip_by_value(y_pred, eps, 1. - eps)
-
-        bce_tp = y_tp * tf.math.log(y_pred) + (1 - y_tp) * tf.math.log(1 - y_pred) * 0.5
-        bce_fp = y_fp * tf.math.log(1 - y_pred)
-
-        bce = bce_tp + bce_fp
-
-        # batch_bce = self.bce(y_tp, y_pred)
-        # w = tf.clip_by_value(y_tp + y_fp, 0, 1)
-        # print(batch_bce, w)
-
-        return - 1. * tf.reduce_mean(bce)

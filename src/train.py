@@ -4,14 +4,15 @@ from models import Classifier, DeepMetricLearning
 
 
 def get_model(
+    model_name="densenet121",
     saved_path="",
     pretrained_with_contrastive=False,
     pretrained_path="",
 ):
     if pretrained_with_contrastive:
-        model = DeepMetricLearning()
+        model = DeepMetricLearning(backbone_name=model_name)
     else:
-        model = Classifier()
+        model = Classifier(backbone_name=model_name)
         model._build()
 
         if pretrained_path != "":
