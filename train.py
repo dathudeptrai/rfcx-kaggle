@@ -191,7 +191,7 @@ def main(
         balanced_train_data_loader,
         steps_per_epoch=int(
             (len(fold_train_dict)) / balanced_train_data_loader.batch_size
-        ),
+        ) if use_fp is False else 50,
         epoch=100,
         validation_data=valid_data_loader,
         callbacks=get_callbacks(fold_idx, saved_path=saved_path)
@@ -206,7 +206,7 @@ def main(
                 save_freq="epoch",
             ),
             tf.keras.callbacks.EarlyStopping(
-                patience=30, monitor="val_loss", mode="min",
+                patience=30 if use_fp is False else 10, monitor="val_loss", mode="min",
             ),
         ],
     )

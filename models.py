@@ -40,12 +40,12 @@ class DeepMetricLearning(tf.keras.Model):
         optimizer,
         metrics,
         metric_loss_fn,
-        classification_los_fn,
+        classification_loss_fn,
         moving_average_bce,
     ):
         super().compile(optimizer, metrics)
         self.metric_loss_fn = metric_loss_fn
-        self.classification_los_fn = classification_los_fn
+        self.classification_loss_fn = classification_loss_fn
         self.moving_average_bce = moving_average_bce
 
     def _apply_gradients(self, total_loss):
