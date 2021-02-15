@@ -192,7 +192,7 @@ class BalancedMelSampler(tf.keras.utils.Sequence):
 
         mix = False
         if use_cutmix and np.random.random() <= 0.5:
-            if np.random.random() <= 0:
+            if np.random.random() <= 1:
                 batch_x_aug, categorical_batch_y, batch_y_seg_aug = self._cutmix(
                     batch_r,
                     batch_x_aug,

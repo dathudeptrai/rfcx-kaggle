@@ -1,0 +1,24 @@
+
+-------------   Fold 1 / 5  -------------
+
+ -> Preparing Data 
+
+ -> Preparing Model 
+
+ -> Loading weights from ../logs/2021-02-04/3/
+
+
+
+Model densenet121
+
+
+Logging results to ../logs/2021-02-13/7/
+
+-------------   Fold 1 / 5  -------------
+
+ -> Preparing Data 
+
+ -> Preparing Model 
+
+Traceback (most recent call last):
+
