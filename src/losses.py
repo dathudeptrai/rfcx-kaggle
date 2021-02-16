@@ -1,6 +1,17 @@
+import numpy as np
 import tensorflow as tf
 import tensorflow_addons as tfa
 from scipy.sparse import csr_matrix
+
+
+CLASS_WEIGHTS = np.array([
+    0.029, 0.073, 0.020, 0.200, 0.013,
+    0.034, 0.005, 0.078, 0.012, 0.009,
+    0.005, 0.043, 0.078, 0.010, 0.043,
+    0.043, 0.029, 0.012, 0.154, 0.003,
+    0.018, 0.044, 0.007, 0.038
+])
+CLASS_WEIGHTS /= CLASS_WEIGHTS.sum()
 
 
 def compute_indptr(y_true):
@@ -107,7 +118,11 @@ class MovingAverageBCE(tf.keras.losses.Loss):
             iterations <= tf.constant(self.start_apply_step, dtype=iterations.dtype)
             or is_cutmix
         ):
-            return tf.reduce_mean(self.bce(y_true, y_pred))
+            bce = 0
+            for i in range(len(CLASS_WEIGHTS)):
+                bce += CLASS_WEIGHTS[i] * self.bce(y_true[:, i], y_pred[:, i])
+
+            return tf.reduce_mean(bce)
         else:
             soft_labels = tf.stop_gradient(tf.nn.sigmoid(y_pred))
             index = self.r_to_idx(recording_ids) - 1  # 0 is oov
@@ -121,5 +136,9 @@ class MovingAverageBCE(tf.keras.losses.Loss):
                 self.moving_average_labels[index[i]].assign(moving_average_pred)
 
             y_true_update = tf.gather(self.moving_average_labels, index)
-            batch_bce = self.bce(y_true_update, y_pred)
-            return tf.reduce_mean(batch_bce)
+
+            bce = 0
+            for i in range(len(CLASS_WEIGHTS)):
+                bce += CLASS_WEIGHTS[i] * self.bce(y_true_update[:, i], y_pred[:, i])
+
+            return tf.reduce_mean(bce)
